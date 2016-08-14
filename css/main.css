@@ -16,6 +16,18 @@
   cursor: pointer;
 }
 
+.videoStoryItem {
+  width: auto;
+  height: 100%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0px;
+  padding: 0px;
+  border: 0px;
+  bottom: 0px;
+}
+
 #trayContainer {
   display: block;
   text-align: center;

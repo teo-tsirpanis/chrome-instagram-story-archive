@@ -215,8 +215,18 @@ function showImageGallery(storyItems) {
       // if videos are available, create a new HTML slide containing the Story video
       if(storyItem['video_versions']) {
         var video = storyItem['video_versions'][0];
+        
+        var storyVideo = document.createElement('video');
+        var source = document.createElement("source");
+        storyVideo.setAttribute("controls", true);
+        if(i === 0) { storyVideo.setAttribute("autoplay", true); }
+        source.src = video['url'];
+        storyVideo.appendChild(source);
+        $(storyVideo).addClass('videoStoryItem');
+        $(storyVideo).css('position', 'absolute');
+        
         slides.push({
-          html: '<video class="pswp__video' + ' active' + '" controls' + ((i == 0) ? ' autoplay' : '') + '><source src="' + video['url'] + '" type="video/mp4"></video>'
+          html: storyVideo
         });
       } else {
         // create a normal slide with the Story image
