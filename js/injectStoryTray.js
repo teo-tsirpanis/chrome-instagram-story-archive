@@ -223,6 +223,7 @@ function showImageGallery(storyItems) {
         source.src = video['url'];
         storyVideo.appendChild(source);
         $(storyVideo).addClass('videoStoryItem');
+        $(storyVideo).addClass('pswp__video active');
         $(storyVideo).css('position', 'absolute');
         
         slides.push({
