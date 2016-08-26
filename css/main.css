@@ -16,6 +16,20 @@
   cursor: pointer;
 }
 
+.storyAuthorImage {
+  width: 32px;
+  height: 32px;
+  left: 10px;
+  top: 40px;
+  border-radius: 50%;
+}
+
+.storyAuthorUsername {
+  left: 55px;
+  top: 50px;
+  color: white;
+}
+
 .videoStoryItem {
   width: auto;
   height: 100%;

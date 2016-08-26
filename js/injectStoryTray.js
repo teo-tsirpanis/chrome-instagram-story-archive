@@ -227,7 +227,8 @@ function showImageGallery(storyItems) {
         $(storyVideo).css('position', 'absolute');
         
         slides.push({
-          html: storyVideo
+          html: storyVideo,
+          storyItem: storyItem
         });
       } else {
         // create a normal slide with the Story image
@@ -238,7 +239,7 @@ function showImageGallery(storyItems) {
           msrc: url,
           w: image['width'],
           h: image['height'],
-          title: storyItem['user']['username'] + " - " + moment.unix(storyItem['taken_at']).fromNow()
+          storyItem: storyItem
         });
       }
     });
@@ -249,7 +250,12 @@ function showImageGallery(storyItems) {
     };
     
     var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, slides, options);
-    gallery.init();
+    
+    // update the Story author's username and profile picture
+    gallery.listen('afterChange', function() {
+      $('.storyAuthorImage').attr("src", gallery.currItem.storyItem['user']['profile_pic_url']);
+      $('.storyAuthorUsername').text(gallery.currItem.storyItem['user']['username'] + " - " + moment.unix(gallery.currItem.storyItem['taken_at']).fromNow());
+    });
     
     // handle playing/pausing videos while traversing the gallery
     gallery.listen('beforeChange', function() {
@@ -275,6 +281,8 @@ function showImageGallery(storyItems) {
         $(this)[0].pause();
       });
     });
+    
+    gallery.init();
     
   });
   
