@@ -6,6 +6,8 @@
 
 .pswp * { position: static; }
 
+.pswp__top-bar { display: block }
+
 .pswp {
   display: none;
   position: absolute;
