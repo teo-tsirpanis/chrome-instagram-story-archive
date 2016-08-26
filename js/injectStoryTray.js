@@ -78,6 +78,11 @@ function injectStoryTray(response) {
       var user = trayItem['user'];
       var picture = user['profile_pic_url'];
       
+      var trayItemContainer = document.createElement('div');
+      trayItemContainer.style.display = 'inline-flex';
+      trayItemContainer.style.marginLeft = '10px';
+      trayItemContainer.style.marginRight = '10px';
+      
       var trayItemImage = document.createElement('img');
       trayItemImage.setAttribute("id", "trayItemImage" + i);
       trayItemImage.width = 64;
@@ -100,6 +105,19 @@ function injectStoryTray(response) {
           });
         }
       });
+      
+      var trayItemUsername = document.createElement('span');
+      trayItemUsername.textContent = user.username;
+      trayItemUsername.style.marginTop = '10px';
+
+      if(trayItem.items) {
+        trayItemUsername.style.color = '#262626';
+      } else {
+        trayItemUsername.style.color = '#a0a0a0';
+      }
+      
+      trayItemContainer.appendChild(trayItemImage);
+      trayItemContainer.appendChild(trayItemUsername);
       
       // right click context menu for downloading Story
       (function(i) {
@@ -128,7 +146,7 @@ function injectStoryTray(response) {
         });
       })(i);
       
-      trayContainer.appendChild(trayItemImage);
+      trayContainer.appendChild(trayItemContainer);
       
     })(trayItem);
     
