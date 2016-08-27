@@ -80,8 +80,8 @@ function injectStoryTray(response) {
       
       var trayItemContainer = document.createElement('div');
       trayItemContainer.style.display = 'inline-flex';
-      trayItemContainer.style.marginLeft = '10px';
-      trayItemContainer.style.marginRight = '10px';
+      trayItemContainer.style.marginLeft = '5px';
+      trayItemContainer.style.marginRight = '5px';
       
       var trayItemImage = document.createElement('img');
       trayItemImage.setAttribute("id", "trayItemImage" + i);
@@ -109,6 +109,7 @@ function injectStoryTray(response) {
       var trayItemUsername = document.createElement('span');
       trayItemUsername.textContent = user.username;
       trayItemUsername.style.marginTop = '10px';
+      trayItemUsername.style.fontSize = '14px';
 
       if(trayItem.items) {
         trayItemUsername.style.color = '#262626';

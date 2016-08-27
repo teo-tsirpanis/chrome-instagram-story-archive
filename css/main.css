@@ -1,5 +1,6 @@
 .unseenStoryItem {
   background: -webkit-linear-gradient(left top, #a31391 0%, #f8a74f 100%);
+  margin-bottom: 3px;
 }
 
 .seenStoryItem {
