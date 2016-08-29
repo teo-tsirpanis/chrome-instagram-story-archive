@@ -17,6 +17,12 @@
   cursor: pointer;
 }
 
+.instagramUserImage {
+  border-radius: 50%;
+  padding: 5px;
+  cursor: pointer;
+}
+
 .storyAuthorImage {
   width: 32px;
   height: 32px;

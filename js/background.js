@@ -58,12 +58,6 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
     if(shouldInjectHeaders) {
       for (var i = 0; i < headers.length; i++) {
         var header = headers[i];
-        // if the referer isn't the main page, don't tamper with the headers and inject the auth cookies
-        if(header.name.toLowerCase() == 'referer') {
-          if(header.value != "https://www.instagram.com/") {
-            shouldInjectHeaders = false;
-          }
-        }
         // don't inject headers if an internal XMLHttpRequest is made (i.e. clicking the profile tab)
         if(header.name.toLowerCase() == 'x-requested-with') {
           shouldInjectHeaders = false;

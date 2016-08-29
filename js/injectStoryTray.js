@@ -1,5 +1,6 @@
 var API_BASE = "https://i.instagram.com/api/v1/feed/";
 var INSTAGRAM_FEED_CLASS_NAME = "_qj7yb";
+var INSTAGRAM_USER_IMAGE_CLASS_NAME = "_8gpiy _r43r5";
 
 // BEGIN INJECTION
 injectPswpContainer();
@@ -11,7 +12,14 @@ chrome.runtime.onMessage.addListener(
     var instagramCookies = JSON.parse(request);    
     // only fetch stories if the cookies are available
     if((instagramCookies.ds_user_id && instagramCookies.sessionid)) {
-      getStories();
+      var instagramFeed = document.getElementsByClassName(INSTAGRAM_FEED_CLASS_NAME)[0];
+      var instagramUserImage = document.getElementsByClassName(INSTAGRAM_USER_IMAGE_CLASS_NAME)[0];
+      if(instagramFeed) {
+        getStories(instagramFeed);
+      }
+      if(instagramUserImage) {
+        getUserStory(instagramUserImage);
+      }
     } 
   });
 
@@ -20,15 +28,47 @@ function loadStories() {
   chrome.runtime.sendMessage('loadStories');
 }
 
+// fetch user's Story and inject it into their profile page if it's available
+function getUserStory(instagramUserImage) {
+  var sharedData = JSON.parse($('html')[0].outerHTML.split("window._sharedData = ")[1].split(";</script>")[0]);
+  var userId = sharedData['entry_data']['ProfilePage'][0]['user']['id'];
+  
+  return getStory(userId).then(function(story) {
+    if(story.items.length > 0) {
+      $(instagramUserImage).addClass('unseenStoryItem');
+      $(instagramUserImage).addClass('instagramUserImage');
+      
+      instagramUserImage.addEventListener("click", function() {
+        showImageGallery(story.items);
+      });
+      
+      // right click context menu for downloading Story
+      $(function() {
+        $.contextMenu({
+          selector: '.instagramUserImage', 
+          callback: function(key, options) {
+            downloadStory(story);
+          },
+          items: {
+            "download": {name: "Download Story"}
+          }
+        });
+      });
+    }
+  }, function(error) {
+    console.log("Error loading Story for user: " + JSON.stringify(error));
+  });
+}
+
 // ping Instagram API for new Stories in tray
-function getStories() {
+function getStories(instagramFeed) {
   var xhr = new XMLHttpRequest();
   xhr.open("GET", API_BASE + "reels_tray/", true);
   xhr.withCredentials = true;
   xhr.onreadystatechange = function() {
     if (xhr.readyState == 4) {
       if(xhr.status == 200) {
-        injectStoryTray(JSON.parse(xhr.responseText));
+        injectStoryTray(JSON.parse(xhr.responseText), instagramFeed);
       }
     }
   }
@@ -62,7 +102,7 @@ function injectPswpContainer() {
 }
 
 // inject Instagram Stories tray above the main Instagram feed
-function injectStoryTray(response) {
+function injectStoryTray(response, instagramFeed) {
   var trayContainer = document.createElement("div");
   trayContainer.setAttribute("id", "trayContainer");
   
@@ -154,10 +194,7 @@ function injectStoryTray(response) {
   }
   
   // inject Story tray above Instagram feed
-  var instagramFeed = document.getElementsByClassName(INSTAGRAM_FEED_CLASS_NAME)[0];
-  if(instagramFeed) {
-    instagramFeed.insertBefore(trayContainer, instagramFeed.childNodes[0]);
-  }
+  instagramFeed.insertBefore(trayContainer, instagramFeed.childNodes[0]);
 }
 
 // downloads a zip file containing the user's Story
