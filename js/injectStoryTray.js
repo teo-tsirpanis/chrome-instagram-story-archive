@@ -122,6 +122,7 @@ function injectStoryTray(response, instagramFeed) {
       trayItemContainer.style.display = 'inline-flex';
       trayItemContainer.style.marginLeft = '5px';
       trayItemContainer.style.marginRight = '5px';
+      trayItemContainer.style.marginBottom = '15px';
       
       var trayItemImage = document.createElement('img');
       trayItemImage.setAttribute("id", "trayItemImage" + i);
