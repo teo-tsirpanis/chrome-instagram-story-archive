@@ -334,8 +334,34 @@ function showImageGallery(storyItems) {
     
     // update the Story author's username and profile picture
     gallery.listen('afterChange', function() {
-      $('.storyAuthorImage').attr("src", gallery.currItem.storyItem['user']['profile_pic_url']);
-      $('.storyAuthorUsername').text(gallery.currItem.storyItem['user']['username'] + " - " + moment.unix(gallery.currItem.storyItem['taken_at']).fromNow());
+      
+      var currItem = $(gallery.currItem.container);
+      
+      var storyAuthorImage = currItem.find('.storyAuthorImage');
+      var storyAuthorUsername = currItem.find('.storyAuthorUsername');
+      
+      // only add the Story author's username/profile picture to the current slide if it doesn't already exist
+      if(storyAuthorImage.length == 0 && storyAuthorUsername.length == 0) {
+        storyAuthorImage = document.createElement('img');
+        storyAuthorImage.setAttribute("class", "storyAuthorImage");
+        storyAuthorImage.style.position = 'absolute';
+        
+        storyAuthorUsername = document.createElement('span');
+        storyAuthorUsername.setAttribute("class", "storyAuthorUsername");
+        storyAuthorUsername.style.position = 'absolute';
+        
+        $(currItem).append(storyAuthorImage);
+        $(currItem).append(storyAuthorUsername);
+      }
+
+      $(storyAuthorImage).attr("src", gallery.currItem.storyItem['user']['profile_pic_url']);
+      $(storyAuthorUsername).text(gallery.currItem.storyItem['user']['username'] + " - " + moment.unix(gallery.currItem.storyItem['taken_at']).fromNow());
+      
+      if(gallery.currItem.storyItem['video_versions']) {
+        $(storyAuthorImage).css("top", "45px");
+        $(storyAuthorUsername).css("top", "55px");
+      }
+      
     });
     
     // handle playing/pausing videos while traversing the gallery

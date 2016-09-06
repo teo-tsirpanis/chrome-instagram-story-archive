@@ -27,14 +27,16 @@
   width: 32px;
   height: 32px;
   left: 10px;
-  top: 40px;
+  top: 15px;
   border-radius: 50%;
+  z-index: 1;
 }
 
 .storyAuthorUsername {
   left: 55px;
-  top: 50px;
+  top: 25px;
   color: white;
+  z-index: 1;
 }
 
 .videoStoryItem {
