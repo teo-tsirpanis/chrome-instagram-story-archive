@@ -149,6 +149,7 @@ function injectStoryTray(response, instagramFeed) {
       trayItemImage.setAttribute("id", "trayItemImage" + i);
       trayItemImage.width = 64;
       trayItemImage.height = 64;
+      trayItemImage.style.margin = 'auto';
       trayItemImage.setAttribute("class", ((trayItem.items) ? "unseenStoryItem" : "seenStoryItem") + " trayItemImage");
       trayItemImage.src = picture.replace("http://", "https://");
       trayItemImage.title = user.username;
