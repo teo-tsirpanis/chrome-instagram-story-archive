@@ -16,19 +16,20 @@ chrome.runtime.onMessage.addListener(
     if (request === "loadStories") {
       getCookies(function(cookies) {
         instagramCookies = cookies;  
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-          // send back cookies so we can check if they are available before we make requests
-          chrome.tabs.sendMessage(tabs[0].id, JSON.stringify(cookies));
-        });
+        sendCookies(instagramCookies);
+      });
+    } else if (request === "refreshPage") {
+      chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+        chrome.tabs.reload(tabs[0].id);
       });
     }
   });
-
-function loadCookies() {
-  getCookies(function(cookies) {
-    instagramCookies = cookies;  
-  });
-}
+  
+  function loadCookies() {
+    getCookies(function(cookies) {
+      instagramCookies = cookies;  
+    });
+  }
 
 // get Instagram cookies for auth
 function getCookies(callback) {
@@ -43,6 +44,20 @@ function getCookies(callback) {
     });
   });
 }
+
+// send back cookies so we can check if they are available before we make requests
+function sendCookies(instagramCookies) {
+  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+    chrome.tabs.sendMessage(tabs[0].id, {instagramCookies: JSON.stringify(instagramCookies)});
+  });
+}
+
+// listen for tab changes (i.e. AJAX request back to the home page) so we can re-inject
+chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
+  if (change.status == "complete" && tab.active) {
+    sendCookies(instagramCookies);
+  }
+});
 
 // hook into web request and modify headers before sending the request
 chrome.webRequest.onBeforeSendHeaders.addListener(

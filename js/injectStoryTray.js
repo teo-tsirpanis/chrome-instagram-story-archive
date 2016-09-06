@@ -9,16 +9,21 @@ loadStories();
 // listen for background.js to send over cookies so we are clear to make requests
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
-    var instagramCookies = JSON.parse(request);    
+    var instagramCookies = JSON.parse(request.instagramCookies);    
     // only fetch stories if the cookies are available
     if((instagramCookies.ds_user_id && instagramCookies.sessionid)) {
       var instagramFeed = document.getElementsByClassName(INSTAGRAM_FEED_CLASS_NAME)[0];
       var instagramUserImage = document.getElementsByClassName(INSTAGRAM_USER_IMAGE_CLASS_NAME)[0];
       if(instagramFeed) {
-        getStories(instagramFeed);
+        // only fetch and inject stories if the stories haven't already been injected
+        if(!document.getElementById("trayContainer")) {
+          getStories(instagramFeed);
+        }
       }
       if(instagramUserImage) {
-        getUserStory(instagramUserImage);
+        if(!$(instagramUserImage).hasClass("instagramUserImage")) {
+          getUserStory(instagramUserImage);
+        }
       }
     } 
   });
@@ -30,8 +35,24 @@ function loadStories() {
 
 // fetch user's Story and inject it into their profile page if it's available
 function getUserStory(instagramUserImage) {
+  // sharedData is a window variable from Instagram that contains information about the current page
   var sharedData = JSON.parse($('html')[0].outerHTML.split("window._sharedData = ")[1].split(";</script>")[0]);
-  var userId = sharedData['entry_data']['ProfilePage'][0]['user']['id'];
+  var entryData = sharedData['entry_data'];
+  var userId;
+  
+  /*
+  * sharedData contains 'ProfilePage' if a user's profile page was loaded by its URL
+  * if you click on a profile from the main Instagram feed or from search, an AJAX request will load the profile
+  * and sharedData will still contain 'FeedPage', not 'ProfilePage'. 
+  */
+  if(entryData['ProfilePage']) {
+    userId = entryData['ProfilePage'][0]['user']['id'];
+  } else if(entryData['FeedPage']) {
+    userId = entryData['FeedPage'][0]['feed']['media']['nodes'][0]['owner']['id'];
+    // refresh the page so we get ProfilePage from sharedData; FeedPage sharedData doesn't have the user's ID 
+    // TODO: figure out way to get user's ID when loading user profile from AJAX 
+    chrome.runtime.sendMessage('refreshPage');
+  }
   
   return getStory(userId).then(function(story) {
     if(story.items.length > 0) {
@@ -195,7 +216,9 @@ function injectStoryTray(response, instagramFeed) {
   }
   
   // inject Story tray above Instagram feed
-  instagramFeed.insertBefore(trayContainer, instagramFeed.childNodes[0]);
+  if(!document.getElementById("trayContainer")) {
+    instagramFeed.insertBefore(trayContainer, instagramFeed.childNodes[0]);
+  }
 }
 
 // downloads a zip file containing the user's Story
