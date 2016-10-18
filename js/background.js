@@ -92,7 +92,7 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
           }
         }
         if (header.name.toLowerCase() == 'user-agent' && shouldInjectHeaders) { 
-          header.value = 'Instagram 9.0.2 (iPhone7,2; iPhone OS 9_3_3; en_US; en-US; scale=2.00; 750x1334) AppleWebKit/420+';
+          header.value = 'Instagram 9.5.2 (iPhone7,2; iPhone OS 9_3_3; en_US; en-US; scale=2.00; 750x1334) AppleWebKit/420+';
         }
         if (header.name.toLowerCase() == 'cookie' && shouldInjectHeaders) { 
           // add auth cookies to authenticate API requests

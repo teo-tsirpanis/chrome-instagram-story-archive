@@ -1,5 +1,8 @@
-var API_BASE = "https://i.instagram.com/api/v1/feed/";
+var API_BASE = "https://i.instagram.com/api/v1/";
+var FEED_API = API_BASE + "feed/";
+var EXPLORE_API = API_BASE + "discover/explore/";
 var INSTAGRAM_FEED_CLASS_NAME = "_qj7yb";
+var INSTAGRAM_EXPLORE_FEED_CLASS_NAME = "_oyz6j";
 var INSTAGRAM_USER_IMAGE_CLASS_NAME = "_8gpiy _r43r5";
 
 // BEGIN INJECTION
@@ -13,11 +16,18 @@ chrome.runtime.onMessage.addListener(
     // only fetch stories if the cookies are available
     if((instagramCookies.ds_user_id && instagramCookies.sessionid)) {
       var instagramFeed = document.getElementsByClassName(INSTAGRAM_FEED_CLASS_NAME)[0];
+      var instagramExploreFeed = document.getElementsByClassName(INSTAGRAM_EXPLORE_FEED_CLASS_NAME)[0];
       var instagramUserImage = document.getElementsByClassName(INSTAGRAM_USER_IMAGE_CLASS_NAME)[0];
       if(instagramFeed) {
         // only fetch and inject stories if the stories haven't already been injected
         if(!document.getElementById("trayContainer")) {
           getStories(instagramFeed);
+        }
+      }
+      if(instagramExploreFeed) {
+        // only fetch and inject stories if the stories haven't already been injected
+        if(!document.getElementById("trayContainer")) {
+          getExploreStories(instagramExploreFeed);
         }
       }
       if(instagramUserImage) {
@@ -84,7 +94,7 @@ function getUserStory(instagramUserImage) {
 // ping Instagram API for new Stories in tray
 function getStories(instagramFeed) {
   var xhr = new XMLHttpRequest();
-  xhr.open("GET", API_BASE + "reels_tray/", true);
+  xhr.open("GET", FEED_API + "reels_tray/", true);
   xhr.withCredentials = true;
   xhr.onreadystatechange = function() {
     if (xhr.readyState == 4) {
@@ -96,11 +106,26 @@ function getStories(instagramFeed) {
   xhr.send();
 }
 
+// ping Instagram API for new Explore Stories in tray
+function getExploreStories(instagramExploreFeed) {
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", EXPLORE_API, true);
+  xhr.withCredentials = true;
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState == 4) {
+      if(xhr.status == 200) {
+        injectStoryTray(JSON.parse(xhr.responseText)["items"][0]["stories"], instagramExploreFeed);
+      }
+    }
+  }
+  xhr.send();
+}
+
 // ping Instagram API for a specific user's Story
 function getStory(userId) {
   return new Promise(function(resolve, reject) {
     var xhr = new XMLHttpRequest();
-    xhr.open("GET", API_BASE + "user/" + userId + "/reel_media/", true);
+    xhr.open("GET", FEED_API + "user/" + userId + "/reel_media/", true);
     xhr.withCredentials = true;
     xhr.onreadystatechange = function() {
       if (xhr.readyState == 4) {
@@ -151,6 +176,10 @@ function injectStoryTray(response, instagramFeed) {
       trayItemImage.height = 64;
       trayItemImage.style.margin = 'auto';
       trayItemImage.setAttribute("class", ((trayItem.items) ? "unseenStoryItem" : "seenStoryItem") + " trayItemImage");
+      if(instagramFeed.className === INSTAGRAM_EXPLORE_FEED_CLASS_NAME) {
+        // always show new Stories as available for Explore Stories since the trayItem doesn't contain the 'items' array
+        trayItemImage.setAttribute("class", "unseenStoryItem trayItemImage");
+      }
       trayItemImage.src = picture.replace("http://", "https://");
       trayItemImage.title = user.username;
       
