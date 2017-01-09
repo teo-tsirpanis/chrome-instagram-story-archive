@@ -182,7 +182,7 @@ function injectStoryTray(response, instagramFeed) {
       }
       trayItemImage.src = picture.replace("http://", "https://");
       trayItemImage.title = user.username;
-      
+    
       trayItemImage.addEventListener("click", function() {
         if(trayItem.items) {
           // if there are new Story images available, show them in the gallery
@@ -199,7 +199,10 @@ function injectStoryTray(response, instagramFeed) {
       });
       
       var trayItemUsername = document.createElement('span');
-      trayItemUsername.textContent = user.username;
+      
+      // to avoid overflow
+      trayItemUsername.textContent = user.username.substr(0, 10) + (user.username.length > 10 ? '…' : '');
+      
       trayItemUsername.style.marginTop = '10px';
       trayItemUsername.style.fontSize = '14px';
 

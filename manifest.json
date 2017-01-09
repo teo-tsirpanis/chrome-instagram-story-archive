@@ -4,7 +4,15 @@
   "version": "1.6",
   "manifest_version": 2,
   "background": {
-    "scripts": ["js/background.js"]
+    "scripts": [
+      "js/event.js",
+      "js/background.js"
+    ],
+    "persistent": true
+  },
+  "browser_action": {
+    "default_title": "Chrome IG Story",
+    "default_popup": "html/popup.html"
   },
   "permissions": [
     "cookies",
@@ -15,7 +23,7 @@
   "content_scripts": [
     {
       "matches": ["*://*.instagram.com/*"],
-      "js": ["js/injectStoryTray.js", "js/jquery-3.1.0.min.js", "js/FileSaver.min.js", "js/jszip.min.js", "js/jszip-utils.min.js", "js/jquery.contextMenu.min.js", "js/photoswipe.min.js", "js/photoswipe-ui-default.min.js", "js/moment.min.js"],
+      "js": ["js/content.js", "js/injectStoryTray.js", "js/jquery-3.1.0.min.js", "js/FileSaver.min.js", "js/jszip.min.js", "js/jszip-utils.min.js", "js/jquery.contextMenu.min.js", "js/photoswipe.min.js", "js/photoswipe-ui-default.min.js", "js/moment.min.js"],
       "css" : ["css/main.css", "css/jquery.contextMenu.min.css", "css/photoswipe.css", "css/default-skin/default-skin.css"]
     }
   ],
@@ -24,6 +32,5 @@
     "js/*",
     "css/*"
   ],
-  
-  "icons": { "16": "icon-16.png", "128": "icon-128.png" }
+  "icons": { "16": "img/icon-16.png", "128": "img/icon-128.png" }
 }
