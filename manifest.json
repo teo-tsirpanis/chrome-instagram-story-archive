@@ -33,5 +33,5 @@
     "img/*"
   ],
   "icons": { "16": "img/icon-16.png", "128": "img/icon-128.png" },
-  "content_security_policy": "script-src 'self' https://ssl.google-analytics.com https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js; object-src 'self'"
+  "content_security_policy": "script-src 'self' https://ssl.google-analytics.com https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js https://d24n15hnbwhuhn.cloudfront.net/libs/amplitude-3.0.1-min.gz.js; object-src 'self'"
 }

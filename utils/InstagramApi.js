@@ -16,6 +16,16 @@ function getStory(userId, callback) {
   .then(callback);
 }
 
+// fetch a particular user's information by their id
+function getUserInfo(userId, callback) {
+  return fetch(`${API_BASE}users/${userId}/info/`, {
+    accept: 'application/json',
+    credentials: 'include'
+  }).then(checkStatus)
+  .then(parseJSON)
+  .then(callback);
+}
+
 // search for a particular user by username
 function searchForUser(username, callback) {
   return fetch(`${API_BASE}users/search/?is_typehead=true&q=${username}`, {
@@ -110,6 +120,7 @@ const InstagramApi = {
   getTopLiveVideos,
   getLiveVideoInfo,
   getLiveVideoComments,
+  getUserInfo,
   searchForUser
 };
 

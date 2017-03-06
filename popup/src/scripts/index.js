@@ -17,10 +17,11 @@ const proxyStore = new Store({
 // http://stackoverflow.com/a/34015469/988941
 injectTapEventPlugin();
 
-AnalyticsUtil.initializeMixpanel();
-
 // wait for the store to connect to the background page
 proxyStore.ready().then(() => {
+  var cookies = proxyStore.getState().popup.cookies;
+  AnalyticsUtil.initializeMixpanel(cookies);
+  AnalyticsUtil.initializeAmplitude(cookies);
   render(
     <Provider store={proxyStore}>
       <MuiThemeProvider muiTheme={muiTheme}>
