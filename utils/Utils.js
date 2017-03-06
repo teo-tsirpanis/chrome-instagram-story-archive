@@ -81,7 +81,6 @@ function renderStoryVideoItem(item) {
         id={item.id}
         src={item.original}
         preload="metadata"
-        muted
         />
     </div>
   )
