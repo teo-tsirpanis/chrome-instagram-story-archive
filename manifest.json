@@ -1,12 +1,11 @@
 {
   "name": "Chrome IG Story",
   "description": "Chrome extension that lets you view your friend's Instagram Stories in the browser.",
-  "version": "1.6",
+  "version": "2.0.0",
   "manifest_version": 2,
   "background": {
     "scripts": [
-      "js/event.js",
-      "js/background.js"
+      "js/event.js"
     ],
     "persistent": true
   },
@@ -18,19 +17,21 @@
     "cookies",
     "webRequest",
     "webRequestBlocking",
-    "*://*.instagram.com/*"
+    "*://*.instagram.com/*",
+    "tabs"
   ],
   "content_scripts": [
     {
       "matches": ["*://*.instagram.com/*"],
-      "js": ["js/content.js", "js/injectStoryTray.js", "js/jquery-3.1.0.min.js", "js/FileSaver.min.js", "js/jszip.min.js", "js/jszip-utils.min.js", "js/jquery.contextMenu.min.js", "js/photoswipe.min.js", "js/photoswipe-ui-default.min.js", "js/moment.min.js"],
-      "css" : ["css/main.css", "css/jquery.contextMenu.min.css", "css/photoswipe.css", "css/default-skin/default-skin.css"]
+      "js": ["js/content.js"],
+      "css" : ["css/main.css"]
     }
   ],
   "web_accessible_resources": [
-    "html/photoswipe.html",
     "js/*",
-    "css/*"
+    "css/*",
+    "img/*"
   ],
-  "icons": { "16": "img/icon-16.png", "128": "img/icon-128.png" }
+  "icons": { "16": "img/icon-16.png", "128": "img/icon-128.png" },
+  "content_security_policy": "script-src 'self' https://ssl.google-analytics.com https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js; object-src 'self'"
 }

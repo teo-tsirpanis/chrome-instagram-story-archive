@@ -60,3 +60,182 @@
   overflow-y: hidden;
   white-space: nowrap;
 }
+
+
+.trayItemImage {
+  width: 64px;
+  height: 64px;
+  margin: auto;
+  border-radius: 50%;
+  margin-left: 5px;
+  margin-right: 5px;
+  padding: 3px;
+  cursor: pointer;
+}
+
+.trayContainer {
+  display: block;
+  text-align: center;
+  margin-bottom: 20px;
+  max-height: 130px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+}
+
+.storyAuthorAttribution {
+  left: 10px;
+  top: 15px;
+  
+  img {
+    width: 24px;
+    height: 24px;
+    
+    @include max-screen(768px) {
+      width: 16px;
+      height: 16px;
+    }
+    @include max-screen(544px) {
+      display: none;
+    }
+  }
+  span {
+    margin-left: 10px;
+    
+    @include max-screen(768px) {
+      font-size: 12px;
+    }
+    @include max-screen(544px) {
+      font-size: 8px;
+      margin-left: 0px;
+    }
+  }
+  @include max-screen(544px) {
+    left: 10px;
+  }
+}
+
+@keyframes react-progress-spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.react-progress-bar {
+  top: 0;
+  left: 0;
+  width: 100%;
+  visibility: visible;
+  margin: 0 2px;
+  opacity: 1;
+  transition: all 400ms;
+  z-index: 999;
+  background-color: rgba(255,255,255,0.4);
+  &.react-progress-bar-on-top {
+    height: 100%;
+  }
+  &.react-progress-bar-hide {
+    opacity: 0;
+    visibility: hidden;
+    z-index: -10;
+  }
+}
+
+.react-progress-bar-percent {
+  height: 2px;
+  background: white;
+  transition: all 200ms ease;
+}
+
+.react-progress-bar-spinner {
+  display: block;
+  position: fixed;
+  top: 15px;
+}
+
+.react-progress-bar-spinner-left {
+  left: 15px;
+  right: auto;
+}
+
+.react-progress-bar-spinner-right {
+  left: auto;
+  right: 15px;
+}
+
+.react-progress-bar-spinner-icon {
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  border: solid 2px transparent;
+  border-top-color: #29d;
+  border-left-color: #29d;
+  border-radius: 50%;
+  animation: react-progress-spinner 400ms linear infinite;
+}
+
+.center-div {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.liveStoryInfoSpan {
+  position: absolute;
+  color: white;
+  text-align: center;
+  width: 100%;
+}
+
+.fadedScroller {
+  overflow: auto;
+  position: relative;
+  height: 100px;
+}
+
+.fadedScroller:after {
+  content:'';
+  bottom: 122px;
+  width: 344px;
+  height: 80px;
+  /*background: linear-gradient(to bottom, #000000 0%, rgba(251, 251, 251, 0) 100%);*/
+  position: fixed;
+}
+
+#chatbox {
+  position: absolute;
+  width: 100%;
+  height: 200px;
+  bottom: 16px;
+}
+
+#chatmessage {
+  overflow: auto;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  max-height: 200px;
+}
+
+#chatmessages div {
+  color: white;
+}
+
+.liveLabel {
+  color: white;
+  padding: 6px;
+  border-radius: 5px;
+  background: #CB007E; /* For browsers that do not support gradients */    
+  background: -webkit-linear-gradient(left, #CB007E , #E0003E); /* For Safari 5.1 to 6.0 */
+  background: -o-linear-gradient(right, #CB007E, #E0003E); /* For Opera 11.1 to 12.0 */
+  background: -moz-linear-gradient(right, #CB007E, #E0003E); /* For Firefox 3.6 to 15 */
+  background: linear-gradient(to right, #CB007E , #E0003E); /* Standard syntax (must be last) */
+}
+
+.tabs-container .tab > div > div svg {
+  fill: #626262 !important;
+}
