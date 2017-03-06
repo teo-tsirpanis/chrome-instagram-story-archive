@@ -16,6 +16,10 @@ You can see Suggested Stories if you go to the Explore feed.
 
 In addition to viewing stories on the Instagram website, you can also access stories within the popup by clicking the extension's icon.
 
+Right click the icon of the Instagram user to download their Story.
+
+You can see Suggested Stories if you go to the Explore feed.
+
 ### Why does the profile picture border not turn gray after I view a Story?
 Currently, Chrome IG Story does not mark the Story as being "seen", so all new content will remain new if you view it with this extension. If you view that user's Story on your phone and refresh the page, the new content will be gray.
 
