@@ -1,5 +1,15 @@
 const path = require('path');
 
+var query = {
+  bypassOnDebug: true,
+  optipng: {
+    optimizationLevel: 7
+  },
+  gifsicle: {
+    interlaced: true
+  }
+};
+
 module.exports = {
   
   entry: [
@@ -13,15 +23,15 @@ module.exports = {
   },
   
   resolve: {
-    extensions: ['', '.js', '.jsx', '.scss', '.json'],
-    modulesDirectories: ['node_modules']
+    extensions: ['.js', '.jsx', '.scss', '.json'],
+    modules: ['node_modules']
   },
   
   module: {
     loaders: [
       {
         test: /\.(jsx|js)?$/,
-        loader: 'babel',
+        loader: 'babel-loader',
         exclude: /(node_modules)/,
         include: [
           path.join(__dirname, 'src'),
@@ -34,8 +44,8 @@ module.exports = {
       {
         test: /\.(jpe?g|png|gif|svg)$/i,
         loaders: [
-          'file?hash=sha512&digest=hex&name=[hash].[ext]',
-          'image-webpack?bypassOnDebug&optimizationLevel=7&interlaced=false'
+          'file-loader?hash=sha512&digest=hex&name=[hash].[ext]',
+          `image-webpack-loader?${JSON.stringify(query)}`
         ]
       },
       {
