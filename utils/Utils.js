@@ -12,12 +12,14 @@ export function getStorySlide(story, callback) {
     if(isVideo(url)){
       return {
         id: media.id,
+        index: key,
         original: url,
         renderItem: renderStoryVideoItem
       };
     } else {
       return {
         id: media.id,
+        index: key,
         original: url,
         renderItem: renderStoryImage
       };
