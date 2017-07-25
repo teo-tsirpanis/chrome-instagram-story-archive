@@ -118,6 +118,10 @@ export function getLiveVideoId(liveVideoItem) {
   return link.split("dash-hd/")[1];
 }
 
+export function getTimeElapsed(timestamp) {
+  return moment.unix(timestamp).fromNow();
+}
+
 export function isVideo(url) {
   return url.indexOf('.mp4') > -1;
 }

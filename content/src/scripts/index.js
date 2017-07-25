@@ -6,6 +6,7 @@ import injectTapEventPlugin from 'react-tap-event-plugin';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import StoriesTray from './components/app/StoriesTray';
 import InstagramApi from '../../../utils/InstagramApi';
+import {getTimeElapsed} from '../../../utils/Utils';
 import PhotoSwipe from 'photoswipe';
 import PhotoSwipeUI_Default from "../../../node_modules/photoswipe/dist/photoswipe-ui-default.min.js";
 import "../../../node_modules/photoswipe/dist/photoswipe.css";
@@ -16,12 +17,13 @@ import $ from 'jquery';
 import {
   INSTAGRAM_FEED_CLASS_NAME,
   INSTAGRAM_EXPLORE_FEED_CLASS_NAME,
+  INSTAGRAM_USER_IMAGE_CLASS_NAME_CONTAINER,
   INSTAGRAM_USER_IMAGE_CLASS_NAME,
   INSTAGRAM_USER_USERNAME_CLASS_NAME,
   muiTheme
 } from '../../../utils/Constants';
 
-var instagramFeed, instagramExploreFeed, instagramUserImage, instagramUserUsername;
+var instagramFeed, instagramExploreFeed, instagramUserImage, instagramUserImageContainer, instagramUserUsername;
 const proxyStore = new Store({portName: 'chrome-ig-story'});
 
 // Needed for onTouchTap
@@ -47,6 +49,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 function injectContentScript() {
   instagramFeed = document.getElementsByClassName(INSTAGRAM_FEED_CLASS_NAME)[0];
   instagramExploreFeed = document.getElementsByClassName(INSTAGRAM_EXPLORE_FEED_CLASS_NAME)[0];
+  instagramUserImageContainer = document.getElementsByClassName(INSTAGRAM_USER_IMAGE_CLASS_NAME_CONTAINER)[0];
   instagramUserImage = document.getElementsByClassName(INSTAGRAM_USER_IMAGE_CLASS_NAME)[0];
   instagramUserUsername = document.getElementsByClassName(INSTAGRAM_USER_USERNAME_CLASS_NAME)[0];
   
@@ -54,8 +57,8 @@ function injectContentScript() {
     injectFriendStories();
   } else if (instagramExploreFeed) {
     injectExploreStories();
-  } else if (instagramUserImage) {
-    if(!$(instagramUserImage).hasClass("instagramUserImage")) {
+  } else if (instagramUserImageContainer) {
+    if(!$(instagramUserImageContainer).hasClass("instagramUserImage")) {
       getUserStory(instagramUserImage);
     }
   }
@@ -63,30 +66,15 @@ function injectContentScript() {
 
 // fetch user's Story and inject it into their profile page if it's available
 function getUserStory(instagramUserImage) {
-  // sharedData is a window variable from Instagram that contains information about the current page
-  var sharedData = JSON.parse($('html')[0].outerHTML.split("window._sharedData = ")[1].split(";</script>")[0]);
-  var entryData = sharedData['entry_data'];
-  var userId;
-  
-  /*
-  * sharedData contains 'ProfilePage' if a user's profile page was loaded by its URL
-  * if you click on a profile from the main Instagram feed or from search, an AJAX request will load the profile
-  * and sharedData will contain 'FeedPage', not 'ProfilePage'. 
-  */
-  if(entryData['ProfilePage']) {
-    userId = entryData['ProfilePage'][0]['user']['id'];
-    InstagramApi.getStory(userId, (story) => {
+  var username = instagramUserUsername.innerText;
+  InstagramApi.searchForUser(username, (users) => {
+    var user =  users.find(function(user) {
+      return user.username === username;
+    });
+    InstagramApi.getStory(user.pk, (story) => {
       injectUserStory(instagramUserImage, story);
     });
-  } else if(entryData['FeedPage']) {
-    // search for the user since the FeedPage sharedData doesn't have the user's ID 
-    var username = instagramUserUsername.innerText;
-    InstagramApi.searchForUser(username, (user) => {
-      InstagramApi.getStory(user.pk, (story) => {
-        injectUserStory(instagramUserImage, story);
-      });
-    });
-  }
+  });
 }
 
 // inject the user's friends' story tray in the homepage above the main feed on Instagram.com
@@ -119,8 +107,9 @@ function injectExploreStories() {
 // inject the story for a particular user while on their profile page e.g. Instagram.com/username
 function injectUserStory(instagramUserImage, story) {
   if(story.items.length > 0) {
-    $(instagramUserImage).addClass('unseenStoryItem');
+    $(instagramUserImageContainer).addClass('unseenStoryItem');
     $(instagramUserImage).addClass('instagramUserImage');
+    $(instagramUserImage).addClass('center-div');
     instagramUserImage.addEventListener("click", function() {
       onStoryClicked(story);
     });
@@ -231,7 +220,7 @@ function showImageGallery(storyItems) {
       }
       
       $(storyAuthorImage).attr("src", gallery.currItem.storyItem['user']['profile_pic_url']);
-      $(storyAuthorUsername).text(gallery.currItem.storyItem['user']['username'] + " - " + moment.unix(gallery.currItem.storyItem['taken_at']).fromNow());
+      $(storyAuthorUsername).text(gallery.currItem.storyItem['user']['username'] + " - " + getTimeElapsed(gallery.currItem.storyItem['taken_at']));
       
       if(gallery.currItem.storyItem['video_versions']) {
         $(storyAuthorImage).css("top", "45px");

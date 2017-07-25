@@ -17,10 +17,14 @@
   cursor: pointer;
 }
 
-.instagramUserImage {
+._r43r5 .instagramUserImage {
+  width: 92%;
+  height: 92%;
   border-radius: 50%;
-  padding: 5px;
   cursor: pointer;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .storyAuthorImage {
