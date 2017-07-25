@@ -6,6 +6,9 @@ import ReduxThunk from 'redux-thunk';
 
 var instagramCookies = {};
 var DOMAIN_URL = "https://www.instagram.com";
+var ajaxReinject = false;
+const X_IG_CAPABILITIES = "36oD";
+const USER_AGENT_STRING = "Instagram 10.26.0 (iPhone7,2; iOS 10_1_1; en_US; en-US; scale=2.00; gamut=normal; 750x1334) AppleWebKit/420+";
 
 // TODO: use aliases properly
 const aliases = {
@@ -112,8 +115,14 @@ chrome.runtime.onMessage.addListener(
   
   // listen for tab changes (i.e. AJAX request back to the home page) so we can re-inject
   chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
-    if (change.status == "complete" && tab.active) {
-      sendCookies(instagramCookies);
+    if (tab.active) {
+      if(change.title) {
+        ajaxReinject = true;
+      }
+      if(ajaxReinject && change.status == "complete") {
+        ajaxReinject = false;
+        sendCookies(instagramCookies);
+      }
     }
   });
   
@@ -141,16 +150,16 @@ chrome.runtime.onMessage.addListener(
       // only inject auth cookies for requests relating to the Instagram Story tray,
       // tampering with the headers on any other request will give you errors
       if(shouldInjectHeaders) {
-        headers.push({name:"x-ig-capabilities",value:"3w=="});
+        headers.push({name: "x-ig-capabilities", value: X_IG_CAPABILITIES});
         for (var i = 0; i < headers.length; i++) {
           var header = headers[i];
           if(header.name.toLowerCase() == 'referer') {
-            if(header.value != "https://www.instagram.com/") {
+            if(!header.value.startsWith("https://www.instagram.com/")) {
               shouldInjectHeaders = false;
             }
           }
           if (header.name.toLowerCase() == 'user-agent' && shouldInjectHeaders) { 
-            header.value = 'Instagram 10.3.2 (iPhone7,2; iPhone OS 9_3_3; en_US; en-US; scale=2.00; 750x1334) AppleWebKit/420+';
+            header.value = USER_AGENT_STRING;
           }
           if (header.name.toLowerCase() == 'cookie' && shouldInjectHeaders) { 
             // add auth cookies to authenticate API requests
