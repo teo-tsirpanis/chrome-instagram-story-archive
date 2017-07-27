@@ -39,7 +39,7 @@ import {
   POPUP_CONTAINER_HEIGHT
 } from '../../../../../utils/Constants';
 
-const tabNames = ["Friends", "Explore", "Live"];
+const tabNames = ["Friends", "Explore", "Live", "Locations"];
 
 class App extends Component {
   constructor(props) {
