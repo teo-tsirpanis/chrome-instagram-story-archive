@@ -31,7 +31,8 @@ class ExploreTab extends Component {
       container: {
         background: TAB_BACKGROUND_COLOR_WHITE,
         minHeight: + TAB_CONTAINER_HEIGHT + 'px',
-        overflowY: 'scroll',
+        overflowX: 'hidden',
+        overflowY: 'auto',
         height: (this.state.isFullPopup) ?  $(window).height() - 112 : TAB_CONTAINER_HEIGHT + 'px'
       },
       refreshIndicator: {

@@ -12,14 +12,28 @@ export function track(eventName, properties) {
 
 // extract the meaningful data from the story for analytics purposes
 export function getStoryObject(story) {
-  var storyUser = (story.user) ? story.user : story.broadcast_owner;
-  return {
-    story: {
-      id: story.id,
-      itemsLength: (story.items) ? story.items.length : null,
-      user: {
-        id: storyUser.pk,
-        username: storyUser.username
+  if(story.location) {
+    var location = story.location;
+    return {
+      story: {
+        id: story.id,
+        itemsLength: (story.items) ? story.items.length : null,
+        location: {
+          id: location.pk,
+          name: location.name
+        }
+      }
+    }
+  } else {
+    var storyUser = (story.user) ? story.user : story.broadcast_owner;
+    return {
+      story: {
+        id: story.id,
+        itemsLength: (story.items) ? story.items.length : null,
+        user: {
+          id: storyUser.pk,
+          username: storyUser.username
+        }
       }
     }
   }

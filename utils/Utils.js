@@ -4,6 +4,7 @@ import JSZipUtils from 'jszip-utils';
 import FileSaver from 'file-saver';
 import moment from 'moment';
 import AnalyticsUtil from './AnalyticsUtil';
+import InstagramApi from './InstagramApi';
 
 // returns the "slide" object the StoryGallery in the Story component uses
 export function getStorySlide(story, callback) {
@@ -33,6 +34,31 @@ export function getStorySlide(story, callback) {
   };
   
   callback(storySlide);
+}
+
+// fetches the appropriate story and returns it (or downloads if shouldDownload is true)
+export function fetchStory(selectedStory, shouldDownload, callback) {
+  if(selectedStory.location) {
+    InstagramApi.getLocationStory(selectedStory.location.pk, (story) => {
+      if(story) {
+        if(shouldDownload) {
+          downloadStory(story, () => callback());
+        } else {
+          getStorySlide(story, (storySlide) => callback(storySlide));
+        }
+      } else {
+        this.props.onSelectStory(null);
+      }
+    });
+  } else {
+    InstagramApi.getStory(selectedStory.id, (story) => {
+      if(shouldDownload) {
+        downloadStory(story, () => callback());
+      } else {
+        getStorySlide(story, (storySlide) => callback(storySlide));
+      }
+    });
+  }
 }
 
 // downloads a zip file containing the user's Story

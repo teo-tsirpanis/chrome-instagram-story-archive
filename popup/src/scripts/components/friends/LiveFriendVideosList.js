@@ -25,33 +25,17 @@ class LiveFriendVideosList extends Component {
   
   handleRequestChange (event, index) {
     var selectedStory = this.props.friendStories.broadcasts[index];
-    this.changeStory(selectedStory);
+    this.props.onSelectStory(selectedStory);
     this.setState({
       selectedIndex: index,
     });
     AnalyticsUtil.track("Story List Item Clicked", AnalyticsUtil.getStoryObject(selectedStory));
   }
   
-  changeStory(storySlide) {
-    const liveVideo = (
-      <LiveVideo item={storySlide}/>
-    );
-    this.props.onSelectStory(liveVideo);
-  }
-  
   render() {
     if(this.props.friendStories.broadcasts.length === 0) {
       return (<div></div>);
     }
-    
-    const rightIconMenu = (
-      <IconMenu
-        iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
-        anchorOrigin={{horizontal: 'left', vertical: 'top'}}
-        targetOrigin={{horizontal: 'left', vertical: 'top'}}>
-        <MenuItem primaryText="Download" leftIcon={<DownloadIcon />} />
-      </IconMenu>
-    );
     
     const friendStoriesListData = this.props.friendStories.broadcasts.map((friendStory, key) => {
       return (
