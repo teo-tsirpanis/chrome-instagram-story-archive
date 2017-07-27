@@ -8,6 +8,10 @@ import VisibilityIcon from 'material-ui/svg-icons/action/visibility';
 import { isVideo } from '../../../../../utils/Utils';
 import AnalyticsUtil from '../../../../../utils/AnalyticsUtil';
 
+import {
+  TAB_TEXT_COLOR_LIGHT_GRAY
+} from '../../../../../utils/Constants';
+
 class Story extends Component {
   constructor(props) {
     super(props);
@@ -18,7 +22,8 @@ class Story extends Component {
       storyLength: 0,
       progressBarsArray: [],
       currentlyPlaying: '',
-      currentStoryItem: this.props.item.story.items[0]
+      currentStoryItem: this.props.item.story.items[0],
+      currentIndex: -1,
     };
     this._eventHandlers = {};
   }
@@ -26,6 +31,9 @@ class Story extends Component {
   componentDidMount = () => {
     this.setState({storyLength: this.props.item.media.length});
     this.initProgressBars();
+    setTimeout(function() {
+      this.playStory(0);
+    }.bind(this), 1);
   }
   
   componentWillUnmount() {
@@ -69,21 +77,17 @@ onStoryFinished(index) {
   this.resetProgressBars();
 }
 
-onSlide = (currentIndex) => {
-  this.setState({currentStoryItem: this.props.item.story.items[this._imageGallery.getCurrentIndex()]});
-  if(currentIndex == 0) {
-    this.onStoryFinished(this.props.index);
-    return;
-  }
-  this.playStory();
-  
-  var currentMedia = this.props.item.media[this._imageGallery.getCurrentIndex()];
-  if(isVideo(currentMedia.original)) {
-    // this.setState({isVideoPlaying: {}});
-    if (this.state.isVideoPlaying === 0) {
-      this.isVideoPlaying();
+onSlide(currentIndex) {
+  if(this.state.currentIndex >= 0) {
+    var previousMedia = this.props.item.media[this.state.currentIndex];
+    if(isVideo(previousMedia.original)) {
+      var video = document.getElementById(previousMedia.id);
+      if(!video.paused) {
+        video.pause();
+      }
     }
   }
+  this.playStory(currentIndex);
 }
 
 isVideoPlaying = () => {
@@ -156,26 +160,20 @@ removeAllEvents(node, event) {
   }
 }
 
-playStory() {
-  var itself = this;
+playStory(currentIndex) {
+  this.setState({
+    currentStoryItem: this.props.item.story.items[this._imageGallery.getCurrentIndex()],
+    currentIndex: currentIndex
+  });
+  
   var currentMedia = this.props.item.media[this._imageGallery.getCurrentIndex()];
   this.setState({currentlyPlaying: currentMedia.original});
+  
   if(isVideo(currentMedia.original)) {
-    // Have video check to see if it's paused
-    this.isVideoPlaying();
-    
     var video = document.getElementById(currentMedia.id);
-    this.addEvent(video, 'ended', this.onStoryItemEnded.bind(this), false)
     if(video.paused) {
       video.play();
     }
-  } else {
-    var imageTimeout = setTimeout(function(){
-      itself.onStoryItemEnded();
-      // TODO: on slide to index, start next progressbar
-    }, 3000);
-    
-    this.setState({imageTimeout: imageTimeout});
   }
 }
 
@@ -194,21 +192,6 @@ pauseStory() {
   } else {
     clearTimeout(this.state.imageTimeout);
   }
-}
-
-onImageLoad() {
-  if(this.props.onImageLoad) {
-    this.props.onImageLoad();
-  }
-}
-
-onStoryClicked() {
-  var itself = this;
-  this.pauseStory();
-  setTimeout(function() {
-    // itself.props.onStoryClicked(itself.props.storyGridIndex);
-    itself.onStoryItemEnded();
-  }, 1);
 }
 
 toggleStoryViewersList() {
@@ -258,8 +241,7 @@ render() {
       height: 'auto',
       maxWidth: '100%',
       width: 'auto',
-      position: 'relative',
-      cursor: 'pointer'
+      position: 'relative'
     },
     overlayTop: {
       position: 'absolute',
@@ -312,10 +294,9 @@ render() {
     },
     storyViewersList: {
       width: '100%',
-      height: '60%',
+      height: '90%',
       position: 'absolute',
-      background: 'rgba(0,0,0,0.3)',
-      bottom: '35px',
+      background: 'rgba(0,0,0,0.6)',
       zIndex: 4,
       overflowY: 'auto'
     },
@@ -347,7 +328,8 @@ render() {
           disabled={true}
           style={styles.storyViewerStyle}
           leftAvatar={<Avatar src={storyViewer.profile_pic_url} style={{cursor: 'pointer'}} size={32} onClick={() => this.onStoryViewerUsernameClicked(key)} />}
-          primaryText={storyViewer.username}
+          primaryText={<div style={{color: 'white', marginLeft: '-15px', marginTop: '-5px'}}>{storyViewer.username}</div>}
+          secondaryText={<span style={{color: TAB_TEXT_COLOR_LIGHT_GRAY, marginLeft: '-15px', fontSize: '10px'}}>{storyViewer.full_name}</span>}
           />
       )
     });
@@ -373,8 +355,8 @@ render() {
         </div>
         
         <div className="storyAuthorAttribution" style={styles.storyAuthorAttribution}>
-          <img src={this.props.item.story.user.profile_pic_url} style={styles.storyAuthorImage} onClick={() => this.onStoryAuthorUsernameClicked()} />
-          <p style={styles.storyAuthorUsername} onClick={() => this.onStoryAuthorUsernameClicked()}>{this.props.item.story.user.username}</p>
+          <img src={this.state.currentStoryItem.user.profile_pic_url} style={styles.storyAuthorImage} onClick={() => this.onStoryAuthorUsernameClicked()} />
+          <p style={styles.storyAuthorUsername} onClick={() => this.onStoryAuthorUsernameClicked()}>{this.state.currentStoryItem.user.username}</p>
           {(this.props.isFullscreen) ? <span style={styles.closeFullscreenStoryButton} onClick={() => this.onCloseFullscreenStoryButtonClicked()}>X</span> : ''}
         </div>
         
@@ -393,21 +375,16 @@ render() {
         }
         
         <StoryGallery
-          onClick={() => this.onStoryClicked()}
           ref={i => this._imageGallery = i}
           items={media}
           showThumbnails={false}
           autoPlay={false}
-          showNav={false}
-          disableSwipe={true}
-          disableArrowKeys={true}
+          showNav={true}
           showPlayButton={false}
           showFullscreenButton={false}
-          lazyLoad={true}
           showBullets={false}
           showIndex={false}
           onSlide={(currentIndex) => this.onSlide(currentIndex)}
-          onImageLoad={() => this.onImageLoad()}
           />
       </div>
     </div>
