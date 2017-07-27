@@ -163,6 +163,10 @@ class App extends Component {
         boxShadow: 'rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px',
         zIndex: 1
       },
+      bottomNavigation: {
+        marginTop: '544px',
+        boxShadow: 'rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px'
+      },
       tabs: {
         position: 'fixed',
         width: '55%',
@@ -278,7 +282,7 @@ class App extends Component {
                 />
             </Tab>
           </Tabs>
-          <BottomNavigation selectedIndex={this.state.currentTabIndex} style={{marginTop: '544px'}}>
+          <BottomNavigation selectedIndex={this.state.currentTabIndex} style={styles.bottomNavigation}>
             <BottomNavigationItem
               label="Friends"
               icon={<PeopleIcon/>}
