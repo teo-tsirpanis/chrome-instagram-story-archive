@@ -3,7 +3,6 @@ import {connect} from 'react-redux';
 import {GridList, GridTile} from 'material-ui/GridList';
 import Subheader from 'material-ui/Subheader';
 import VisibilityIcon from 'material-ui/svg-icons/action/visibility';
-import LiveVideo from './LiveVideo';
 import AnalyticsUtil from '../../../../../utils/AnalyticsUtil';
 import $ from 'jquery';
 
@@ -30,10 +29,7 @@ class LiveTab extends Component {
   
   selectLiveVideo(index) {
     var selectedLiveVideo = this.props.topLiveVideos[index];
-    const liveVideoItem = (
-      <LiveVideo item={this.props.topLiveVideos[index]}/>
-    );
-    this.props.onSelectStory(liveVideoItem);
+    this.props.onSelectStory(selectedLiveVideo);
     AnalyticsUtil.track("Live Video Item Clicked", AnalyticsUtil.getLiveVideoObject(selectedLiveVideo));
   }
   
@@ -65,14 +61,14 @@ class LiveTab extends Component {
     return (
       <div style={styles.root}>
         <GridList
-          cellHeight={360}
+          cellHeight={260}
           cols={3}
           padding={5}
           style={styles.gridList}>
           {this.props.topLiveVideos.map((tile, index) => (
             <GridTile key={tile.id}>
-              <img src={tile.cover_frame_url} style={{cursor: 'pointer'}} onClick={()=>this.selectLiveVideo(index)} />
-              <img src="../img/overlayBottom.png" style={{width: '100%', position: 'absolute', bottom: '0px'}}/>
+              <img src={tile.cover_frame_url} style={{cursor: 'pointer', height: '100%'}} onClick={()=>this.selectLiveVideo(index)} />
+              <img src="../img/overlayBottom.png" style={{width: '100%', height: '85px', position: 'absolute', bottom: '0px'}}/>
               <span className="liveStoryInfoSpan" style={{bottom: '32px'}}>
                 <div>
                   <VisibilityIcon color="#ffffff"/>
