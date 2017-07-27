@@ -8,20 +8,28 @@ import Avatar from 'material-ui/Avatar';
 import IconButton from 'material-ui/IconButton';
 import OpenInNewIcon from 'material-ui/svg-icons/action/open-in-new';
 import ActionExploreIcon from 'material-ui/svg-icons/action/explore';
+import ActionSearchIcon from 'material-ui/svg-icons/action/search';
 import PeopleIcon from 'material-ui/svg-icons/social/people';
 import LiveTvIcon from 'material-ui/svg-icons/notification/live-tv';
+import PlaceIcon from 'material-ui/svg-icons/maps/place';
+import {BottomNavigation, BottomNavigationItem} from 'material-ui/BottomNavigation';
+import CircularProgress from 'material-ui/CircularProgress';
+import Snackbar from 'material-ui/Snackbar';
 
 import FriendsTab from '../friends/FriendsTab';
 import ExploreTab from '../explore/ExploreTab';
 import LiveTab from '../live/LiveTab';
+import LocationsTab from '../locations/LocationsTab';
 
 import Story from './Story';
+import LiveVideo from '../live/LiveVideo';
+import SearchPage from '../search/SearchPage';
 import InstagramApi from '../../../../../utils/InstagramApi';
 import {getStorySlide} from '../../../../../utils/Utils';
 import AnalyticsUtil from '../../../../../utils/AnalyticsUtil';
 import $ from 'jquery';
 
-import "../../../../../node_modules/react-image-gallery/styles/scss/image-gallery.scss";
+import "../../../../../node_modules/react-image-gallery/styles/css/image-gallery.css";
 
 import {
   TAB_TEXT_COLOR_DARK_GRAY,
@@ -42,7 +50,9 @@ class App extends Component {
       isFriendsTabLoading: true,
       isExploreTabLoading: true,
       isLiveTabLoading: true,
-      isFullPopup: false
+      isFullPopup: false,
+      isSearchActive: true,
+      isSnackbarActive: false
     }
   }
   
@@ -78,7 +88,7 @@ class App extends Component {
     
     // fetch all the data from the Instagram API and dispatch it to the store
     InstagramApi.getFriendStories((friendStoriesResponse) => this.loadFriendsStoryTray(friendStoriesResponse));
-    InstagramApi.getExploreStories((exploreStoriesResponse) => this.loadExploreStoryTray(exploreStoriesResponse));
+    InstagramApi.getExploreFeed((exploreStoriesResponse) => this.loadExploreStoryTray(InstagramApi.getExploreStories(exploreStoriesResponse)));
     InstagramApi.getTopLiveVideos((topLiveVideosResponse) => this.loadTopLiveVideos(topLiveVideosResponse));
   }
   
@@ -107,17 +117,35 @@ class App extends Component {
   }
   
   changeStory(storySlide) {
-    const story = (
-      <Story item={storySlide} autoPlay={true}/>
-    );
-    this.setNewStory(story);
+    if(storySlide === null) {
+      this.setState({isSnackbarActive: true});
+    } else {
+      var story;
+      if(storySlide.broadcast_owner) {
+        story = (
+          <LiveVideo item={storySlide}/>
+        );
+      } else {
+        story = (
+          <Story item={storySlide} autoPlay={true}/>
+        );
+      }
+      this.setNewStory(story);
+    }  
   }
   
   setNewStory(story) {
-    this.setState({currentStory: null});
+    this.setState({
+      currentStory: null,
+      isSearchActive: false
+    });
     setTimeout(function() {
       this.setState({currentStory: story});
     }.bind(this), 100);
+  }
+  
+  handleSnackbarRequestClose() {
+    this.setState({isSnackbarActive: false});
   }
   
   render() {
@@ -130,33 +158,44 @@ class App extends Component {
       },
       appBar: {
         position: 'fixed',
-        width: (this.state.currentStory != null) ? '57%' : '100%',
+        width: '55%',
         backgroundColor: TAB_BACKGROUND_COLOR_WHITE,
         boxShadow: 'rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px',
         zIndex: 1
       },
       tabs: {
         position: 'fixed',
-        width: (this.state.currentStory != null) ? '57%' : '100%',
-        marginTop: '58px'
+        width: '55%',
+        marginTop: '56px'
       },
       defaultTab: {
         backgroundColor: TAB_BACKGROUND_COLOR_WHITE,
         color: TAB_TEXT_COLOR_DARK_GRAY,
+        display: 'none'
       },
       activeTab: {
         backgroundColor: TAB_BACKGROUND_COLOR_WHITE,
         color: TAB_TEXT_COLOR_LIGHT_GRAY,
+        display: 'none'
       },
       friendsStoriesList: {
-        width: (this.state.currentStory != null) ? '57%' : '100%',
+        width: '55%',
         minHeight: POPUP_CONTAINER_HEIGHT + 'px',
         float: 'left',
-        overflowY: 'scroll'
+        overflowY: 'auto'
       },
       friendsStoryContainer: {
         minHeight: POPUP_CONTAINER_HEIGHT + 'px',
-        marginLeft:  (this.state.currentStory != null) ? '57%' : '0%'
+        marginLeft: '55%',
+        backgroundColor: '#FAFAFA'
+      },
+      loadingIndicator: {
+        position: 'sticky',
+        display: 'block',
+        margin: 'auto auto',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(0%, -50%)'
       }
     };
     
@@ -164,6 +203,7 @@ class App extends Component {
     styles.tab[0] = styles.activeTab;
     styles.tab[1] = styles.activeTab;
     styles.tab[2] = styles.activeTab;
+    styles.tab[3] = styles.activeTab;
     styles.tab[this.state.currentTabIndex] = Object.assign({}, styles.tab[this.state.currentTabIndex], styles.defaultTab);
     
     return (
@@ -183,6 +223,18 @@ class App extends Component {
                 disabled={true}/>
             </ToolbarGroup>
             <ToolbarGroup lastChild={true}>
+              <IconButton
+                tooltip="Search"
+                tooltipPosition="bottom-center"
+                onClick={()=> {
+                  this.setState({
+                    currentStory: null,
+                    isSearchActive: true
+                  });
+                  AnalyticsUtil.track("Search Button Clicked"); 
+                }}>
+                <ActionSearchIcon color={TAB_TEXT_COLOR_DARK_GRAY}/>
+              </IconButton>
               {!this.state.isFullPopup &&
                 <IconButton
                   tooltip="Popout"
@@ -201,28 +253,65 @@ class App extends Component {
             onChange={this.handleTabChange}
             style={styles.tabs}
             className="tabs-container">
-            <Tab label="Friends" icon={<PeopleIcon/>} value={0} style={styles.tab[0]} className="tab">
+            <Tab value={0} style={styles.tab[0]} className="tab">
               <FriendsTab
                 isLoading={this.state.isFriendsTabLoading}
-                onSelectStory={(story) => this.setNewStory(story)}
+                onSelectStory={(story) => this.changeStory(story)}
                 />
             </Tab>
-            <Tab label="Explore" icon={<ActionExploreIcon/>} value={1} style={styles.tab[1]} className="tab">
+            <Tab value={1} style={styles.tab[1]} className="tab">
               <ExploreTab
                 isLoading={this.state.isExploreTabLoading}
-                onSelectStory={(story) => this.setNewStory(story)}
+                onSelectStory={(story) => this.changeStory(story)}
                 />
             </Tab>
-            <Tab label="Live" icon={<LiveTvIcon/>} value={2} style={styles.tab[2]} className="tab">
+            <Tab value={2} style={styles.tab[2]} className="tab">
               <LiveTab
                 isLoading={this.state.isLiveTabLoading}
-                onSelectStory={(story) => this.setNewStory(story)}
+                onSelectStory={(story) => this.changeStory(story)}
+                />
+            </Tab>
+            <Tab value={3} style={styles.tab[3]} className="tab">
+              <LocationsTab
+                isLoading={this.state.isLiveTabLoading}
+                onSelectStory={(story) => this.changeStory(story)}
                 />
             </Tab>
           </Tabs>
+          <BottomNavigation selectedIndex={this.state.currentTabIndex} style={{marginTop: '544px'}}>
+            <BottomNavigationItem
+              label="Friends"
+              icon={<PeopleIcon/>}
+              onTouchTap={() => this.handleTabChange(0)}
+              />
+            <BottomNavigationItem
+              label="Explore"
+              icon={<ActionExploreIcon/>}
+              onTouchTap={() => this.handleTabChange(1)}
+              />
+            <BottomNavigationItem
+              label="Top Live"
+              icon={<LiveTvIcon/>}
+              onTouchTap={() => this.handleTabChange(2)}
+              />
+            <BottomNavigationItem
+              label="Locations"
+              icon={<PlaceIcon/>}
+              onTouchTap={() => this.handleTabChange(3)}
+              />
+          </BottomNavigation>
+          
         </div>
         <div style={styles.friendsStoryContainer}>
           {this.state.currentStory != null && this.state.currentStory}
+          {this.state.isSearchActive && <SearchPage onSelectStory={(story) => this.changeStory(story)}/>}
+          
+          <Snackbar
+            open={this.state.isSnackbarActive}
+            autoHideDuration={3000}
+            onRequestClose={() => this.handleSnackbarRequestClose()}
+            message="No story available"/>
+          
         </div>
       </div>
     );

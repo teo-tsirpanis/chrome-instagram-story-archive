@@ -7,6 +7,7 @@ const initialState = {
     tray: [],
     top_live: []
   },
+  locationStories: [],
   topLiveVideos: [],
   currentStoryId: null,
   currentStoryItem: null

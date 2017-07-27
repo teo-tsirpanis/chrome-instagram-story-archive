@@ -48,7 +48,9 @@ export function downloadStory(trayItem, callback) {
   .then(function(content) {
     FileSaver.saveAs(content, getZipFileName(trayItem));
     AnalyticsUtil.track("Download Story", AnalyticsUtil.getStoryObject(trayItem));
-    callback();
+    if(callback) {
+      callback();
+    }
   });
 }
 
@@ -67,7 +69,10 @@ function urlToPromise(url) {
 
 // returns the name of the zip file to download with format: (username-timestamp.zip)
 function getZipFileName(trayItem) {
-  return trayItem.user.username + "-" + moment().format() + ".zip";
+  var user, name;
+  user = (trayItem.user) ? trayItem.user : trayItem.owner;
+  name = (user.username) ? user.username : user.name;
+  return name + "-" + moment().format() + ".zip";
 }
 
 // returns the name of the image/video file to add to the zip file
