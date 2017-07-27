@@ -23,7 +23,7 @@ export const TAB_TEXT_COLOR_DARK_GRAY = "#262626";
 export const TAB_BACKGROUND_COLOR_WHITE = "#ffffff";
 
 // UI dimensions 
-export const TAB_CONTAINER_HEIGHT = 465;
+export const TAB_CONTAINER_HEIGHT = 490;
 export const POPUP_CONTAINER_WIDTH = 800;
 export const POPUP_CONTAINER_HEIGHT = 600;
 
