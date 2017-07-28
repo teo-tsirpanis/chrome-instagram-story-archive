@@ -246,18 +246,20 @@ class App extends Component {
                 disabled={true}/>
             </ToolbarGroup>
             <ToolbarGroup lastChild={true}>
-              <IconButton
-                tooltip="Search"
-                tooltipPosition="bottom-center"
-                onClick={()=> {
-                  this.setState({
-                    currentStory: null,
-                    isSearchActive: true
-                  });
-                  AnalyticsUtil.track("Search Button Clicked"); 
-                }}>
-                <ActionSearchIcon color={TAB_TEXT_COLOR_DARK_GRAY}/>
-              </IconButton>
+              {!this.state.isSearchActive &&
+                <IconButton
+                  tooltip="Search"
+                  tooltipPosition="bottom-center"
+                  onClick={()=> {
+                    this.setState({
+                      currentStory: null,
+                      isSearchActive: true
+                    });
+                    AnalyticsUtil.track("Search Button Clicked"); 
+                  }}>
+                  <ActionSearchIcon color={TAB_TEXT_COLOR_DARK_GRAY}/>
+                </IconButton>
+              }
               {!this.state.isFullPopup &&
                 <IconButton
                   tooltip="Popout"
