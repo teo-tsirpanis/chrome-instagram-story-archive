@@ -43,11 +43,16 @@ class SearchPage extends Component {
       if(searchQuery.length === 0) {
         return;
       }
+      if(searchQuery !== itself.state.searchQuery) {
+        AnalyticsUtil.track("Search", {
+          type: tabNames[itself.state.currentTabIndex],
+          query: searchQuery
+        });
+      }
       itself.setState({
         isSearchResultsActive: true,
         searchQuery: itself.refs.splashSearchQuery.getValue()
       });
-      AnalyticsUtil.track("Search", {"query": searchQuery});
     }
   }
   
@@ -56,11 +61,16 @@ class SearchPage extends Component {
     if(searchQuery.length === 0) {
       return;
     }
+    if(searchQuery !== this.state.searchQuery) {
+      AnalyticsUtil.track("Search", {
+        type: tabNames[this.state.currentTabIndex],
+        query: searchQuery
+      });
+    }
     this.setState({
       isSearchResultsActive: true,
       searchQuery: searchQuery
     });
-    AnalyticsUtil.track("Search", {"query": searchQuery});
   }
   
   handleSearch() {
@@ -68,10 +78,15 @@ class SearchPage extends Component {
     if(searchQuery.length === 0) {
       return;
     }
+    if(searchQuery !== this.state.searchQuery) {
+      AnalyticsUtil.track("Search", {
+        type: tabNames[this.state.currentTabIndex],
+        query: searchQuery
+      });
+    }
     this.setState({
       searchQuery: searchQuery
     });
-    AnalyticsUtil.track("Search", {"query": searchQuery});
   }
   
   handleSearchKeyPress(e) {
@@ -80,10 +95,15 @@ class SearchPage extends Component {
       if(searchQuery.length === 0) {
         return;
       }
+      if(searchQuery !== this.state.searchQuery) {
+        AnalyticsUtil.track("Search", {
+          type: tabNames[this.state.currentTabIndex],
+          query: searchQuery
+        });
+      }
       this.setState({
         searchQuery: this.refs.searchQuery.getValue()
       });
-      AnalyticsUtil.track("Search", {"query": searchQuery});
     }
   }
   
