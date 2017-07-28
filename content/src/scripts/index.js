@@ -6,7 +6,7 @@ import injectTapEventPlugin from 'react-tap-event-plugin';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import StoriesTray from './components/app/StoriesTray';
 import InstagramApi from '../../../utils/InstagramApi';
-import {getTimeElapsed} from '../../../utils/Utils';
+import {getTimeElapsed, downloadStory} from '../../../utils/Utils';
 import PhotoSwipe from 'photoswipe';
 import PhotoSwipeUI_Default from "../../../node_modules/photoswipe/dist/photoswipe-ui-default.min.js";
 import "../../../node_modules/photoswipe/dist/photoswipe.css";
@@ -112,6 +112,12 @@ function injectUserStory(instagramUserImage, story) {
     $(instagramUserImage).addClass('center-div');
     instagramUserImage.addEventListener("click", function() {
       onStoryClicked(story);
+    });
+    instagramUserImage.addEventListener("contextmenu", function(ev) {
+      ev.preventDefault();
+      InstagramApi.getStory(story.id).then(function(story) {
+        downloadStory(story);
+      });
     });
   }
 }
