@@ -172,16 +172,6 @@ class App extends Component {
         width: '55%',
         marginTop: '56px'
       },
-      defaultTab: {
-        backgroundColor: TAB_BACKGROUND_COLOR_WHITE,
-        color: TAB_TEXT_COLOR_DARK_GRAY,
-        display: 'none'
-      },
-      activeTab: {
-        backgroundColor: TAB_BACKGROUND_COLOR_WHITE,
-        color: TAB_TEXT_COLOR_LIGHT_GRAY,
-        display: 'none'
-      },
       friendsStoriesList: {
         width: '55%',
         minHeight: POPUP_CONTAINER_HEIGHT + 'px',
@@ -203,12 +193,41 @@ class App extends Component {
       }
     };
     
-    styles.tab = [];
-    styles.tab[0] = styles.activeTab;
-    styles.tab[1] = styles.activeTab;
-    styles.tab[2] = styles.activeTab;
-    styles.tab[3] = styles.activeTab;
-    styles.tab[this.state.currentTabIndex] = Object.assign({}, styles.tab[this.state.currentTabIndex], styles.defaultTab);
+    var currentTab;
+    switch(this.state.currentTabIndex) {
+      case 0:
+      currentTab = (
+        <FriendsTab
+          isLoading={this.state.isFriendsTabLoading}
+          onSelectStory={(story) => this.changeStory(story)}
+          />
+      );
+      break;
+      case 1:
+      currentTab = (
+        <ExploreTab
+          isLoading={this.state.isExploreTabLoading}
+          onSelectStory={(story) => this.changeStory(story)}
+          />
+      );
+      break;
+      case 2:
+      currentTab = (
+        <LiveTab
+          isLoading={this.state.isLiveTabLoading}
+          onSelectStory={(story) => this.changeStory(story)}
+          />
+      );
+      break;
+      case 3:
+      currentTab = (
+        <LocationsTab
+          isLoading={this.state.isLiveTabLoading}
+          onSelectStory={(story) => this.changeStory(story)}
+          />
+      );
+      break;
+    }
     
     return (
       <div style={styles.popupContainer}>
@@ -252,36 +271,11 @@ class App extends Component {
               }
             </ToolbarGroup>
           </Toolbar>
-          <Tabs
-            value={this.state.currentTabIndex}
-            onChange={this.handleTabChange}
+          <div
             style={styles.tabs}
             className="tabs-container">
-            <Tab value={0} style={styles.tab[0]} className="tab">
-              <FriendsTab
-                isLoading={this.state.isFriendsTabLoading}
-                onSelectStory={(story) => this.changeStory(story)}
-                />
-            </Tab>
-            <Tab value={1} style={styles.tab[1]} className="tab">
-              <ExploreTab
-                isLoading={this.state.isExploreTabLoading}
-                onSelectStory={(story) => this.changeStory(story)}
-                />
-            </Tab>
-            <Tab value={2} style={styles.tab[2]} className="tab">
-              <LiveTab
-                isLoading={this.state.isLiveTabLoading}
-                onSelectStory={(story) => this.changeStory(story)}
-                />
-            </Tab>
-            <Tab value={3} style={styles.tab[3]} className="tab">
-              <LocationsTab
-                isLoading={this.state.isLiveTabLoading}
-                onSelectStory={(story) => this.changeStory(story)}
-                />
-            </Tab>
-          </Tabs>
+            {currentTab}
+          </div>
           <BottomNavigation selectedIndex={this.state.currentTabIndex} style={styles.bottomNavigation}>
             <BottomNavigationItem
               label="Friends"
