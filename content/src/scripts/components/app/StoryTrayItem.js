@@ -48,7 +48,7 @@ class StoryTrayItem extends Component {
       }
     }  
     return (
-      <div ref="TrayItemContainer" style={styles.trayItemContainer}>
+      <div ref="TrayItemContainer" style={styles.trayItemContainer} className={(this.props.storyItem.muted) ? "mutedStoryItem" : ""}>
         {this.props.trayItemIcon}
         <span style={styles.trayItemUsername}>{this.props.trayItemUsername.substr(0, 10) + (this.props.trayItemUsername.length > 10 ? '…' : '')}</span>
         <Popover

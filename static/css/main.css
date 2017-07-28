@@ -9,6 +9,10 @@
   border-color: gray;
 }
 
+.mutedStoryItem {
+  opacity: 0.2;
+}
+
 .trayItemImage {
   border-radius: 50%;
   margin-left: 5px;
