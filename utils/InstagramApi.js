@@ -8,6 +8,8 @@ import {
   LIVE_API
 } from './Constants';
 
+import JSONbig from 'json-bigint';
+
 // fetch a particular user's story
 function getStory(userId, callback) {
   return fetch(`${FEED_API}user/${userId}/reel_media/`, {
@@ -104,7 +106,8 @@ function getFriendStories(callback) {
     accept: 'application/json',
     credentials: 'include'
   }).then(checkStatus)
-  .then(parseJSON)
+  .then(parseText)
+  .then(parseBigJSON)
   .then(callback);
 }
 
@@ -180,6 +183,14 @@ function checkStatus(response) {
     console.log(error);
     throw error;
   }
+}
+
+function parseBigJSON(text) {
+    return JSONbig.parse(text);
+}
+
+function parseText(response) {
+  return response.text();
 }
 
 function parseJSON(response) {

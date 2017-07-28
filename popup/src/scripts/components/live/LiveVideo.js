@@ -4,7 +4,6 @@ import {List, ListItem} from 'material-ui/List';
 import Avatar from 'material-ui/Avatar';
 import $ from 'jquery';
 import moment from 'moment';
-import bigInt from 'big-integer';
 import InstagramApi from '../../../../../utils/InstagramApi';
 import VisibilityIcon from 'material-ui/svg-icons/action/visibility';
 import AnalyticsUtil from '../../../../../utils/AnalyticsUtil';
@@ -63,10 +62,7 @@ class LiveVideo extends Component {
   // fetch the comments for a post-live video
   // TODO: right now it only fetches the first batch - need to fetch in an interval based on offset
   fetchPostLiveVideoComments(timestamp) {
-    var postLiveVideoId = this.state.liveVideoItem.id;
-    // the correct ID to fetch a post-live video's comments is the original ID plus 1 for some reason
-    var correctPostLiveVideoId = bigInt(postLiveVideoId).plus(1).toString();
-    InstagramApi.getPostLiveVideoComments(correctPostLiveVideoId, timestamp, (postLiveVideoCommentsResponse) => {
+    InstagramApi.getPostLiveVideoComments(this.state.liveVideoItem.id, timestamp, (postLiveVideoCommentsResponse) => {
       postLiveVideoCommentsResponse.comments.slice(0).reverse().map((chatMessage, key) => {
         this.setState({chatMessagesList: [
           ...this.state.chatMessagesList, chatMessage
