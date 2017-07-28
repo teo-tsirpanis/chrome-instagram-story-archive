@@ -40,7 +40,7 @@ class SearchPage extends Component {
     var itself = this;
     if(e.key === 'Enter') {
       var searchQuery = this.refs.splashSearchQuery.getValue();
-      if(searchQuery.length == 0) {
+      if(searchQuery.length === 0) {
         return;
       }
       itself.setState({
@@ -53,6 +53,9 @@ class SearchPage extends Component {
   
   handleSplashSearch() {
     var searchQuery = this.refs.splashSearchQuery.getValue();
+    if(searchQuery.length === 0) {
+      return;
+    }
     this.setState({
       isSearchResultsActive: true,
       searchQuery: searchQuery
@@ -62,6 +65,9 @@ class SearchPage extends Component {
   
   handleSearch() {
     var searchQuery = this.refs.searchQuery.getValue();
+    if(searchQuery.length === 0) {
+      return;
+    }
     this.setState({
       searchQuery: searchQuery
     });
@@ -71,7 +77,7 @@ class SearchPage extends Component {
   handleSearchKeyPress(e) {
     if(e.key === 'Enter') {
       var searchQuery = this.refs.searchQuery.getValue();
-      if(searchQuery.length == 0) {
+      if(searchQuery.length === 0) {
         return;
       }
       this.setState({
