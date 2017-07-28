@@ -19,8 +19,14 @@ class LocationsList extends Component {
       selectedIndex: -1,
       downloadingIndex: -1,
       isDownloadingStory: false,
-      stories: countriesList
+      stories: []
     }
+  }
+  
+  componentDidMount() {
+    setTimeout(function() {
+      this.setState({stories: countriesList});
+    }.bind(this), 100);  
   }
   
   handleRequestChange (event, index) {
