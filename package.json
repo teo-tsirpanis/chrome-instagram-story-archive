@@ -8,6 +8,7 @@
   },
   "author": "Alec Garcia",
   "dependencies": {
+    "big-integer": "^1.6.23",
     "codem-isoboxer": "^0.3.4",
     "dashjs": "^2.5.0",
     "dgram": "^1.0.1",

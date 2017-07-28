@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import CircularProgress from 'material-ui/CircularProgress';
 import RefreshIndicator from 'material-ui/RefreshIndicator';
+import PostLiveFriendVideosList from './PostLiveFriendVideosList';
 import LiveFriendVideosList from './LiveFriendVideosList';
 import FriendStoriesList from './FriendStoriesList';
 import $ from 'jquery';
@@ -31,7 +32,8 @@ class FriendsTab extends Component {
       container: {
         background: TAB_BACKGROUND_COLOR_WHITE,
         minHeight: TAB_CONTAINER_HEIGHT + 'px',
-        overflowY: 'scroll',
+        overflowX: 'hidden',
+        overflowY: 'auto',
         height: (this.state.isFullPopup) ?  $(window).height() - 112 : TAB_CONTAINER_HEIGHT + 'px',
       },
       refreshIndicator: {
@@ -58,6 +60,12 @@ class FriendsTab extends Component {
             style={styles.refreshIndicator}/>
         }
         
+        {this.props.friendStories.post_live && 
+          <PostLiveFriendVideosList
+            friendStories={this.props.friendStories}
+            onSelectStory={(story) => this.props.onSelectStory(story)}/>
+        }
+      
         <LiveFriendVideosList
           friendStories={this.props.friendStories}
           onSelectStory={(story) => this.props.onSelectStory(story)}/>

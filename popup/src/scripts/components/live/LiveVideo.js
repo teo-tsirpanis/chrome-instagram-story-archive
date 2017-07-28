@@ -4,10 +4,11 @@ import {List, ListItem} from 'material-ui/List';
 import Avatar from 'material-ui/Avatar';
 import $ from 'jquery';
 import moment from 'moment';
+import bigInt from 'big-integer';
 import InstagramApi from '../../../../../utils/InstagramApi';
 import VisibilityIcon from 'material-ui/svg-icons/action/visibility';
 import AnalyticsUtil from '../../../../../utils/AnalyticsUtil';
-import {getLiveVideoId} from '../../../../../utils/Utils';
+import {getLiveVideoId, getLiveVideoManifestObject} from '../../../../../utils/Utils';
 
 class LiveVideo extends Component {
   constructor(props){
@@ -16,19 +17,23 @@ class LiveVideo extends Component {
       liveVideoPlayer: null,
       chatMessagesList: [],
       liveVideoItem: this.props.item,
-      updateInfoInterval: null
+      updateInfoInterval: null,
+      isPostLive: (this.props.item.dash_manifest) ? true : false
     }
   }
   
   componentDidMount() {
     this.playLiveVideo();
     // fetch initial set of comments
-    this.fetchLiveVideoComments(null);
-    
-    this.setState({updateInfoInterval: setInterval(function() {
-      // update the video information every 8 seconds
-      this.updateVideoInformation();
-    }.bind(this), 8000)}); 
+    if(this.state.isPostLive) {
+      this.fetchPostLiveVideoComments(0);
+    } else {
+      this.fetchLiveVideoComments(null);
+      this.setState({updateInfoInterval: setInterval(function() {
+        // update the video information every 8 seconds
+        this.updateVideoInformation();
+      }.bind(this), 8000)}); 
+    }
   }
   
   componentWillUnmount() {
@@ -55,11 +60,36 @@ class LiveVideo extends Component {
     });
   }
   
+  // fetch the comments for a post-live video
+  // TODO: right now it only fetches the first batch - need to fetch in an interval based on offset
+  fetchPostLiveVideoComments(timestamp) {
+    var postLiveVideoId = this.state.liveVideoItem.id;
+    // the correct ID to fetch a post-live video's comments is the original ID plus 1 for some reason
+    var correctPostLiveVideoId = bigInt(postLiveVideoId).plus(1).toString();
+    InstagramApi.getPostLiveVideoComments(correctPostLiveVideoId, timestamp, (postLiveVideoCommentsResponse) => {
+      postLiveVideoCommentsResponse.comments.slice(0).reverse().map((chatMessage, key) => {
+        this.setState({chatMessagesList: [
+          ...this.state.chatMessagesList, chatMessage
+        ]});
+      });
+      $('#chatmessages').scrollTop($('#chatmessages')[0].scrollHeight);
+    });
+  }
+  
   playLiveVideo() {
     if(this.state.liveVideoPlayer == null) {
       let url = this.state.liveVideoItem.dash_playback_url;
       let player = MediaPlayer().create();
-      player.initialize(document.querySelector('#liveVideoPlayer-' + this.state.liveVideoItem.id), url, true);
+
+      if(this.state.isPostLive) {
+        player.initialize(document.querySelector('#liveVideoPlayer-' + this.state.liveVideoItem.id));
+        // a post-live video object contains a string representation of the manifest that needs to be parsed
+        var manifestObject = getLiveVideoManifestObject(this.state.liveVideoItem.dash_manifest);
+        player.attachSource(manifestObject);
+      } else {
+        player.initialize(document.querySelector('#liveVideoPlayer-' + this.state.liveVideoItem.id), url, true);
+      }
+      
       player.getDebug().setLogToBrowserConsole(false);
       player.play();
       this.setState({liveVideoPlayer: player});
@@ -81,7 +111,8 @@ class LiveVideo extends Component {
   }
   
   onChatMesssageAuthorUsernameClicked(index) {
-    var chatMessageAuthorUsername = this.state.chatMessagesList[index].user.username;
+    var chatMessage = this.state.chatMessagesList[index];
+    var chatMessageAuthorUsername = (this.state.isPostLive) ? chatMessage.comment.user.username : chatMessage.user.username;
     window.open('https://www.instagram.com/' + chatMessageAuthorUsername + '/');
     AnalyticsUtil.track("Live Video Comment Author Username Clicked", {username: chatMessageAuthorUsername});
   }
@@ -157,16 +188,20 @@ class LiveVideo extends Component {
     };
     
     const chatMessageListData = this.state.chatMessagesList.map((chatMessage, key) => {
+      var comment = chatMessage;
+      if(chatMessage.comment) {
+        comment = chatMessage.comment;
+      }
       return (
         <ListItem
           key={key}
           disabled={true}
           style={styles.chatMessageStyle}
-          leftAvatar={<Avatar src={chatMessage.user.profile_pic_url} style={{cursor: 'pointer'}} size={32} onClick={() => this.onChatMesssageAuthorUsernameClicked(key)} />}
-          primaryText={chatMessage.user.username}
+          leftAvatar={<Avatar src={comment.user.profile_pic_url} style={{cursor: 'pointer'}} size={32} onClick={() => this.onChatMesssageAuthorUsernameClicked(key)} />}
+          primaryText={comment.user.username}
           secondaryText={
             <p style={{color: 'white', height: 'initial', fontSize: '12px'}}>
-              {chatMessage.text}
+              {comment.text}
             </p>
           }
           secondaryTextLines={2}
@@ -191,15 +226,19 @@ class LiveVideo extends Component {
           <img src={this.state.liveVideoItem.broadcast_owner.profile_pic_url} style={styles.storyAuthorImage} onClick={() => this.onStoryAuthorUsernameClicked()} />
           <p style={styles.storyAuthorUsername} onClick={() => this.onStoryAuthorUsernameClicked()}>{this.state.liveVideoItem.broadcast_owner.username}</p>
           
-          <div style={styles.liveCountLabel}>
-            <VisibilityIcon color="#ffffff" style={{float: 'left'}} viewBox={'0 0 32 32'}/>
-            <p style={styles.viewCountSpan}>{this.state.liveVideoItem.viewer_count}</p>
-          </div>
-          <span style={styles.liveLabel} className="liveLabel" onClick={() => this.onCloseFullscreenStoryButtonClicked()}>LIVE</span>
+          {!this.state.isPostLive &&
+            <div>
+              <div style={styles.liveCountLabel}>
+                <VisibilityIcon color="#ffffff" style={{float: 'left'}} viewBox={'0 0 32 32'}/>
+                <p style={styles.viewCountSpan}>{this.state.liveVideoItem.viewer_count}</p>
+              </div>
+              <span style={styles.liveLabel} className="liveLabel" onClick={() => this.onCloseFullscreenStoryButtonClicked()}>LIVE</span>
+            </div>
+          }
         </div>
         <div id="chatbox" className="fadedScroller">
           <div id="chatmessages">
-            <List>
+            <List style={{paddingTop: '0px', paddingBottom: '10px'}}>
               {chatMessageListData}
             </List>
           </div>

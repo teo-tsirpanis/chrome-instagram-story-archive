@@ -149,6 +149,17 @@ function getLiveVideoComments(id, timestamp, callback) {
   .then(callback);
 }
 
+// fetch the comments for a post-live video
+function getPostLiveVideoComments(id, timestamp, callback) {
+  var LIVE_API_URL = `${LIVE_API}${id}/get_post_live_comments/?starting_offset=${timestamp}&encoding_tag=instagram_dash_remuxed`;
+  return fetch(LIVE_API_URL, {
+    accept: 'application/json',
+    credentials: 'include'
+  }).then(checkStatus)
+  .then(parseJSON)
+  .then(callback);
+}
+
 // fetch the information for a particular live video
 function getLiveVideoInfo(id, callback) {
   return fetch(`${LIVE_API}${id}/info/`, {
@@ -185,6 +196,7 @@ const InstagramApi = {
   getTopLiveVideos,
   getLiveVideoInfo,
   getLiveVideoComments,
+  getPostLiveVideoComments,
   getUserInfo,
   searchForUser,
   searchForHashtag,

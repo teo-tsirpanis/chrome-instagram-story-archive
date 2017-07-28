@@ -5,6 +5,8 @@ import FileSaver from 'file-saver';
 import moment from 'moment';
 import AnalyticsUtil from './AnalyticsUtil';
 import InstagramApi from './InstagramApi';
+import XLinkController from "../node_modules/dashjs/src/streaming/controllers/XlinkController.js";
+import DashParser from "../node_modules/dashjs/src/dash/parser/DashParser.js";
 
 // returns the "slide" object the StoryGallery in the Story component uses
 export function getStorySlide(story, callback) {
@@ -128,6 +130,30 @@ function renderStoryImage(item) {
         />
     </div>
   )
+}
+
+// returns a parsed manifest object from a dash manifest string representation
+export function getLiveVideoManifestObject(manifest) {
+  const parser = DashParser().create();
+  const xlink = XLinkController().create({});
+  var mpd = parser.parse(manifest, xlink);
+  mpd.loadedTime = new Date();
+  xlink.resolveManifestOnLoad(mpd);
+  return mpd;
+}
+
+// returns the URL of an audio mp4 file for a post-live video
+export function getLiveVideoMp4AudioUrl(manifest, callback) {
+  var manifestObject = getLiveVideoManifestObject(manifest);
+  var adaptationSet = manifestObject.Period_asArray[0].AdaptationSet_asArray;
+  callback(adaptationSet[0].Representation.BaseURL);
+}
+
+// returns the URL of a video mp4 file for a post-live video
+export function getLiveVideoMp4VideoUrl(manifest, callback) {
+  var manifestObject = getLiveVideoManifestObject(manifest);
+  var adaptationSet = manifestObject.Period_asArray[0].AdaptationSet_asArray;
+  callback(adaptationSet[1].Representation.BaseURL);
 }
 
 // returns an optimized URL format for the image/video
