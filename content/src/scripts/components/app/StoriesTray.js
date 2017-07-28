@@ -28,12 +28,15 @@ class StoriesTray extends Component {
   
   render() {
     const storyTrayItems = this.getStoryItems().map((storyTrayItem, key) => {
+      var story = this.getStoryItems()[key];
+      var seenClass = (story.seen === 0) ? "unseenStoryItem" : "seenStoryItem";
       return (
         <StoryTrayItem
           key={key}
           trayItemIndex={key}
-          trayItemIcon={<img className="trayItemImage unseenStoryItem" src={storyTrayItem.user.profile_pic_url} onClick={() => this.viewUserStory(key)}/>}
+          trayItemIcon={<img className={"trayItemImage " + seenClass} src={storyTrayItem.user.profile_pic_url} onClick={() => this.viewUserStory(key)}/>}
           trayItemUsername={storyTrayItem.user.username}
+          storyItem={story}
           onDownloadStory={(index) => this.onDownloadStory(index)}
           />
       )});
