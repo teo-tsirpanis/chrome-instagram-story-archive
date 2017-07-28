@@ -49,7 +49,7 @@ export function fetchStory(selectedStory, shouldDownload, callback) {
           getStorySlide(story, (storySlide) => callback(storySlide));
         }
       } else {
-        this.props.onSelectStory(null);
+        callback(null);
       }
     });
   } else {

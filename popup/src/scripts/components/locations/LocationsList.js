@@ -1,15 +1,10 @@
 import React, { Component } from 'react';
-
 import {List, ListItem, makeSelectable} from 'material-ui/List';
 import Avatar from 'material-ui/Avatar';
-import IconMenu from 'material-ui/IconMenu';
-import MenuItem from 'material-ui/MenuItem';
 import IconButton from 'material-ui/IconButton';
 import Subheader from 'material-ui/Subheader';
-import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import DownloadIcon from 'material-ui/svg-icons/file/file-download';
-
-import Story from '../app/Story';
+import CircularProgress from 'material-ui/CircularProgress';
 import InstagramApi from '../../../../../utils/InstagramApi';
 import {downloadStory, getStorySlide} from '../../../../../utils/Utils';
 import AnalyticsUtil from '../../../../../utils/AnalyticsUtil';
@@ -22,6 +17,8 @@ class LocationsList extends Component {
     super(props);
     this.state = {
       selectedIndex: -1,
+      downloadingIndex: -1,
+      isDownloadingStory: false,
       stories: countriesList
     }
   }
@@ -44,15 +41,22 @@ class LocationsList extends Component {
       <IconButton
         tooltip="Download"
         onClick={() => {
-          InstagramApi.getLocationStory(this.state.stories[index].locationId, (story) => {
-            if(story) {
-              downloadStory(story);
-            } else {
-              this.props.onSelectStory(null);
-            }
-          });
+          if(!this.state.isDownloadingStory) {
+            this.setState({
+              isDownloadingStory: true,
+              downloadingIndex: index
+            });
+            InstagramApi.getLocationStory(this.state.stories[index].locationId, (story) => {
+              if(story) {
+                downloadStory(story, () => this.setState({isDownloadingStory: false}));
+              } else {
+                this.props.onSelectStory(null);
+                this.setState({isDownloadingStory: false});
+              }
+            });
+          }
         }}>
-        <DownloadIcon />
+        {(this.state.isDownloadingStory && this.state.downloadingIndex === index) ? <CircularProgress size={24}/> : <DownloadIcon />}
       </IconButton>
     );
   }
