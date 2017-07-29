@@ -17,17 +17,17 @@ class LocationSearchTab extends Component {
       results: []
     }
   }
-  
+
   componentDidMount() {
     this.searchForLocation(this.props.searchQuery);
   }
-  
+
   componentWillReceiveProps(nextProps) {
     if(this.props.searchQuery !== nextProps.searchQuery) {
       this.searchForLocation(nextProps.searchQuery);
-    }  
+    }
   }
-  
+
   searchForLocation(query) {
     this.setState({isLoading: true});
     InstagramApi.searchForLocation(query, (searchResponse) => {
@@ -37,12 +37,13 @@ class LocationSearchTab extends Component {
       })
     });
   }
-  
+
   render() {
     const styles = {
       container: {
         background: TAB_BACKGROUND_COLOR_WHITE,
         minHeight: TAB_CONTAINER_HEIGHT + 'px',
+        overflowX: 'hidden',
         overflowY: 'auto',
         height: (this.state.isFullPopup) ?  $(window).height() - 112 : TAB_CONTAINER_HEIGHT + 'px',
       },
@@ -51,7 +52,7 @@ class LocationSearchTab extends Component {
         margin: '0 auto'
       },
     };
-    
+
     if(this.state.isLoading && this.state.results.length == 0) {
       return (
         <div style={styles.container}>
@@ -61,7 +62,7 @@ class LocationSearchTab extends Component {
     }
     return (
       <div style={styles.container}>
-        {this.state.isLoading && this.state.results.length > 0 && 
+        {this.state.isLoading && this.state.results.length > 0 &&
           <RefreshIndicator
             size={40}
             left={10}
@@ -69,7 +70,7 @@ class LocationSearchTab extends Component {
             status="loading"
             style={styles.refreshIndicator}/>
         }
-        
+
         <LocationSearchList
           results={this.state.results}
           onSelectStory={(story) => this.props.onSelectStory(story)}/>

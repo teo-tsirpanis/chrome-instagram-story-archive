@@ -17,17 +17,17 @@ class HashtagSearchTab extends Component {
       results: []
     }
   }
-  
+
   componentDidMount() {
     this.searchForHashtag(this.props.searchQuery);
   }
-  
+
   componentWillReceiveProps(nextProps) {
     if(this.props.searchQuery !== nextProps.searchQuery) {
       this.searchForHashtag(nextProps.searchQuery);
-    }  
+    }
   }
-  
+
   searchForHashtag(hashtag) {
     this.setState({isLoading: true});
     InstagramApi.searchForHashtag(hashtag, (searchResponse) => {
@@ -37,12 +37,13 @@ class HashtagSearchTab extends Component {
       })
     });
   }
-  
+
   render() {
     const styles = {
       container: {
         background: TAB_BACKGROUND_COLOR_WHITE,
         minHeight: TAB_CONTAINER_HEIGHT + 'px',
+        overflowX: 'hidden',
         overflowY: 'auto',
         height: (this.state.isFullPopup) ?  $(window).height() - 112 : TAB_CONTAINER_HEIGHT + 'px',
       },
@@ -51,7 +52,7 @@ class HashtagSearchTab extends Component {
         margin: '0 auto'
       },
     };
-    
+
     if(this.state.isLoading && this.state.results.length == 0) {
       return (
         <div style={styles.container}>
@@ -61,7 +62,7 @@ class HashtagSearchTab extends Component {
     }
     return (
       <div style={styles.container}>
-        {this.state.isLoading && this.state.results.length > 0 && 
+        {this.state.isLoading && this.state.results.length > 0 &&
           <RefreshIndicator
             size={40}
             left={10}
@@ -69,7 +70,7 @@ class HashtagSearchTab extends Component {
             status="loading"
             style={styles.refreshIndicator}/>
         }
-        
+
         <HashtagSearchList
           results={this.state.results}
           onSelectStory={(story) => this.props.onSelectStory(story)}/>

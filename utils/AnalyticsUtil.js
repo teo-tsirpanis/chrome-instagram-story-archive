@@ -26,6 +26,9 @@ export function getStoryObject(story) {
     }
   } else {
     var storyUser = (story.user) ? story.user : story.broadcast_owner;
+    if(!storyUser) {
+      storyUser = story.owner;
+    }
     return {
       story: {
         id: story.id,

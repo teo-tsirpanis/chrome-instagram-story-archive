@@ -2,8 +2,11 @@ import React, { Component } from 'react';
 import {connect} from 'react-redux';
 import {List, ListItem, makeSelectable} from 'material-ui/List';
 import Avatar from 'material-ui/Avatar';
+import IconButton from 'material-ui/IconButton';
+import DownloadIcon from 'material-ui/svg-icons/file/file-download';
+import CircularProgress from 'material-ui/CircularProgress';
 import InstagramApi from '../../../../../utils/InstagramApi';
-import {getStorySlide} from '../../../../../utils/Utils';
+import {fetchStory} from '../../../../../utils/Utils';
 import AnalyticsUtil from '../../../../../utils/AnalyticsUtil';
 
 let SelectableList = makeSelectable(List);
@@ -12,21 +15,19 @@ class HashtagSearchList extends Component {
   constructor(props){
     super(props);
     this.state = {
-      selectedIndex: -1
+      selectedIndex: -1,
+      downloadingIndex: -1,
+      isDownloadingStory: false
     }
   }
-  
+
   handleRequestChange (event, index) {
     var selectedResult = this.props.results[index];
-    InstagramApi.getHashtagStory(selectedResult.name, (story) => {
-      if(story) {
-        getStorySlide(story, (storySlide) => this.props.onSelectStory(storySlide));
-        this.setState({
-          selectedIndex: index,
-        });
-      } else {
-        this.props.onSelectStory(null);
-      }
+    fetchStory(selectedResult, false, (storySlide) => {
+      this.props.onSelectStory(storySlide);
+    });
+    this.setState({
+      selectedIndex: index,
     });
     AnalyticsUtil.track("Search List Item Clicked",
     {
@@ -37,7 +38,31 @@ class HashtagSearchList extends Component {
       }
     });
   }
-  
+
+  getMenuItem(index) {
+    return (
+      <IconButton
+        tooltip="Download"
+        onClick={() => {
+          if(!this.state.isDownloadingStory) {
+            var selectedResult = this.props.results[index];
+            this.setState({
+              isDownloadingStory: true,
+              downloadingIndex: index
+            });
+            fetchStory(selectedResult, true, (story) => {
+              this.setState({isDownloadingStory: false});
+              if(!story) {
+                this.props.onSelectStory(null);
+              }
+            });
+          }
+        }}>
+        {(this.state.isDownloadingStory && this.state.downloadingIndex === index) ? <CircularProgress size={24}/> : <DownloadIcon />}
+      </IconButton>
+    );
+  }
+
   render() {
     const hashtagSearchListData = this.props.results.map((hashtag, key) => {
       return (
@@ -45,10 +70,12 @@ class HashtagSearchList extends Component {
           key={key}
           value={key}
           primaryText={hashtag.name}
-          leftAvatar={<Avatar>#</Avatar>}/>
+          leftAvatar={<Avatar>#</Avatar>}
+          rightIconButton={this.getMenuItem(key)}
+          />
       )
     });
-    
+
     return (
       <SelectableList value={this.state.selectedIndex} onChange={this.handleRequestChange.bind(this)}>
         {hashtagSearchListData}

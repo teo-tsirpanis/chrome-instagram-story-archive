@@ -28,13 +28,13 @@ export function getStorySlide(story, callback) {
       };
     }
   });
-  
+
   var storySlide = {
     key: story.id,
     media: storyMedia,
     story: story
   };
-  
+
   callback(storySlide);
 }
 
@@ -44,7 +44,20 @@ export function fetchStory(selectedStory, shouldDownload, callback) {
     InstagramApi.getLocationStory(selectedStory.location.pk, (story) => {
       if(story) {
         if(shouldDownload) {
-          downloadStory(story, () => callback());
+          downloadStory(story, () => callback(true));
+        } else {
+          getStorySlide(story, (storySlide) => callback(storySlide));
+        }
+      } else {
+        callback(null);
+      }
+    });
+  } else if(selectedStory.name) {
+    InstagramApi.getHashtagStory(selectedStory.name, (story) => {
+      console.log(story);
+      if(story) {
+        if(shouldDownload) {
+          downloadStory(story, () => callback(true));
         } else {
           getStorySlide(story, (storySlide) => callback(storySlide));
         }
@@ -54,10 +67,14 @@ export function fetchStory(selectedStory, shouldDownload, callback) {
     });
   } else {
     InstagramApi.getStory(selectedStory.id, (story) => {
-      if(shouldDownload) {
-        downloadStory(story, () => callback());
+      if(story && story.items.length > 0) {
+        if(shouldDownload) {
+          downloadStory(story, () => callback(true));
+        } else {
+          getStorySlide(story, (storySlide) => callback(storySlide));
+        }
       } else {
-        getStorySlide(story, (storySlide) => callback(storySlide));
+        callback(null);
       }
     });
   }
