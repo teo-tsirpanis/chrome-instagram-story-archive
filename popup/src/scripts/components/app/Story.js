@@ -1,11 +1,14 @@
 import React, { Component } from 'react';
 import StoryGallery from 'react-image-gallery';
 import SingleProgressBar from './SingleProgressBar';
+import IconButton from 'material-ui/IconButton';
 import FlatButton from 'material-ui/FlatButton';
+import CircularProgress from 'material-ui/CircularProgress';
 import {List, ListItem} from 'material-ui/List';
 import Avatar from 'material-ui/Avatar';
 import VisibilityIcon from 'material-ui/svg-icons/action/visibility';
-import { isVideo } from '../../../../../utils/Utils';
+import DownloadIcon from 'material-ui/svg-icons/file/file-download';
+import {downloadStory, isVideo} from '../../../../../utils/Utils';
 import AnalyticsUtil from '../../../../../utils/AnalyticsUtil';
 
 import {
@@ -27,7 +30,7 @@ class Story extends Component {
     };
     this._eventHandlers = {};
   }
-  
+
   componentDidMount = () => {
     this.setState({storyLength: this.props.item.media.length});
     this.initProgressBars();
@@ -35,11 +38,11 @@ class Story extends Component {
       this.playStory(0);
     }.bind(this), 1);
   }
-  
+
   componentWillUnmount() {
     clearInterval(this.state.isVideoPlaying);
   }
-  
+
   initProgressBars = (shouldPlayStory) => {
     const createProgressBars = this.props.item.media.map((singleStory, key) => {
       let progressLength;
@@ -55,9 +58,9 @@ class Story extends Component {
       }
     }
   );
-  
+
   this.setState({progressBarsArray: createProgressBars});
-  
+
   if(this.props.autoPlay || shouldPlayStory) {
     setTimeout(function() {
       this.playStory();
@@ -92,24 +95,24 @@ onSlide(currentIndex) {
 
 isVideoPlaying = () => {
   clearInterval(this.state.isVideoPlaying);
-  
+
   if(this._imageGallery !== null) {
     var itself = this;
     const checkVideoInterval = setInterval(() => {
       if(itself._imageGallery === null) {
         clearInterval(checkVideoInterval)
       }
-      
+
       const currentMedia = itself.props.item.media[itself._imageGallery.getCurrentIndex()];
       const video = document.getElementById(currentMedia.id);
-      
+
       if (video && !video.paused) {
         itself.setState({currentlyPlaying: currentMedia.original});
       } else {
         itself.setState({currentlyPlaying: {}});
       }
     }, 100);
-    
+
     itself.setState({isVideoPlaying: checkVideoInterval})
   }
 }
@@ -125,7 +128,7 @@ onStoryItemEnded() {
       var currentMedia = this.props.item.media[this._imageGallery.getCurrentIndex()];
       this.props.onStoryItemEnded(currentMedia);
     }
-    
+
     this._imageGallery.slideToIndex(this._imageGallery.getCurrentIndex() + 1);
     if(this.props.item.media.length == 1) {
       this.onStoryFinished(this.props.index);
@@ -165,10 +168,10 @@ playStory(currentIndex) {
     currentStoryItem: this.props.item.story.items[this._imageGallery.getCurrentIndex()],
     currentIndex: currentIndex
   });
-  
+
   var currentMedia = this.props.item.media[this._imageGallery.getCurrentIndex()];
   this.setState({currentlyPlaying: currentMedia.original});
-  
+
   if(isVideo(currentMedia.original)) {
     var video = document.getElementById(currentMedia.id);
     if(video.paused) {
@@ -283,6 +286,13 @@ render() {
       width: '100%',
       zIndex: 4,
     },
+    overlayBottom: {
+      width: '100%',
+      height: '85px',
+      position: 'absolute',
+      bottom: '0px',
+      zIndex: 4
+    },
     closeFullscreenStoryButton: {
       float: 'right',
       color: 'white',
@@ -294,7 +304,7 @@ render() {
     },
     storyViewersList: {
       width: '100%',
-      height: '90%',
+      height: '85%',
       position: 'absolute',
       background: 'rgba(0,0,0,0.6)',
       zIndex: 4,
@@ -304,8 +314,21 @@ render() {
       fontSize: '15px',
       color: 'white'
     },
+    downloadButton: {
+      position: 'absolute',
+      bottom: '40px',
+      zIndex: 4,
+      color: 'white'
+    },
+    storyViewersButton: {
+      position: 'absolute',
+      bottom: '50px',
+      right: '0px',
+      zIndex: 4,
+      color: 'white'
+    }
   }
-  
+
   const media = this.props.item.media;
   const allPossibleProgressBars = this.state.progressBarsArray.map((pb, key) => {
     return (
@@ -318,7 +341,7 @@ render() {
         />
     )
   });
-  
+
   var storyViewersListData = [];
   if(this.state.currentStoryItem.viewers) {
     storyViewersListData = this.state.currentStoryItem.viewers.map((storyViewer, key) => {
@@ -334,46 +357,60 @@ render() {
       )
     });
   }
-  
+
   return (
     <div ref="SingleStory" className="SingleStory">
-      
+
       <div
         className="storyImage"
         style={styles.storyImage}
         onMouseEnter={() => this.onMouseEnter()}
         onMouseLeave={() => this.onMouseLeave()}>
-        
+
         <div className="overlayTop" style={styles.overlayTop}>
           <img src="/img/overlayTop.png" style={{width: '100%'}} alt=""/>
         </div>
-        
+
+        <img src="/img/overlayBottom.png" style={styles.overlayBottom}/>
+
         <div className="spb" style={styles.spb}>
           <div className="StoryProgressBars" style={styles.StoryProgressBars}>
             {allPossibleProgressBars}
           </div>
         </div>
-        
+
         <div className="storyAuthorAttribution" style={styles.storyAuthorAttribution}>
           <img src={this.state.currentStoryItem.user.profile_pic_url} style={styles.storyAuthorImage} onClick={() => this.onStoryAuthorUsernameClicked()} />
           <p style={styles.storyAuthorUsername} onClick={() => this.onStoryAuthorUsernameClicked()}>{this.state.currentStoryItem.user.username}</p>
           {(this.props.isFullscreen) ? <span style={styles.closeFullscreenStoryButton} onClick={() => this.onCloseFullscreenStoryButtonClicked()}>X</span> : ''}
         </div>
-        
+
         {this.state.currentStoryItem.viewers &&
           <FlatButton
-            style={{position: 'absolute', bottom: '0px', width: '100%', zIndex: 4, color: 'white'}}
+            style={styles.storyViewersButton}
             label={this.state.currentStoryItem.viewers.length}
             icon={<VisibilityIcon color={"#ffffff"}/>}
             onClick={() => this.toggleStoryViewersList()}/>
         }
-        
+
+        <IconButton
+          style={styles.downloadButton}
+          tooltip="Download"
+          tooltipPosition="top-center"
+          onClick={() => {
+            if(!this.state.isDownloadingStory) {
+              this.onDownloadStory();
+            }
+          }}>
+          {(this.state.isDownloadingStory) ? <CircularProgress size={24} color={"#ffffff"}/> : <DownloadIcon color={"#ffffff"}/>}
+        </IconButton>
+
         {this.state.isStoryViewersListActive &&
           <List style={styles.storyViewersList}>
             {storyViewersListData}
           </List>
         }
-        
+
         <StoryGallery
           ref={i => this._imageGallery = i}
           items={media}
