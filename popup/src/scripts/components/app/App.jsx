@@ -55,12 +55,12 @@ class App extends Component {
       isSnackbarActive: false
     }
   }
-  
+
   handleTabChange = (value) => {
     this.setState({currentTabIndex: value});
     AnalyticsUtil.track(tabNames[value] + " Tab Selected");
   };
-  
+
   componentDidMount() {
     if(this.props.currentStoryItem != null) {
       /*
@@ -75,31 +75,31 @@ class App extends Component {
             type: 'SET_CURRENT_STORY_ITEM',
             currentStoryItem: null
           });
-        });  
+        });
       });
     }
-    
+
     if(this.props.isFullPopup) {
-      AnalyticsUtil.track("Popout Opened");   
+      AnalyticsUtil.track("Popout Opened");
       this.setState({isFullPopup: true});
     } else {
-      AnalyticsUtil.track("Popup Opened");      
+      AnalyticsUtil.track("Popup Opened");
     }
-    
+
     // fetch all the data from the Instagram API and dispatch it to the store
     InstagramApi.getFriendStories((friendStoriesResponse) => this.loadFriendsStoryTray(friendStoriesResponse));
     InstagramApi.getExploreFeed((exploreStoriesResponse) => this.loadExploreStoryTray(InstagramApi.getExploreStories(exploreStoriesResponse)));
     InstagramApi.getTopLiveVideos((topLiveVideosResponse) => this.loadTopLiveVideos(topLiveVideosResponse));
   }
-  
-  loadFriendsStoryTray(friendStoriesResponse) {    
+
+  loadFriendsStoryTray(friendStoriesResponse) {
     this.props.dispatch({
       type: 'SET_FRIEND_STORIES',
       friendStories: friendStoriesResponse
     });
     this.setState({isFriendsTabLoading: false});
   }
-  
+
   loadExploreStoryTray(exploreStoriesResponse) {
     this.props.dispatch({
       type: 'SET_EXPLORE_STORIES',
@@ -107,7 +107,7 @@ class App extends Component {
     });
     this.setState({isExploreTabLoading: false});
   }
-  
+
   loadTopLiveVideos(topLiveVideosResponse) {
     this.props.dispatch({
       type: 'SET_TOP_LIVE_VIDEOS',
@@ -115,7 +115,7 @@ class App extends Component {
     });
     this.setState({isLiveTabLoading: false});
   }
-  
+
   changeStory(storySlide) {
     if(storySlide === null) {
       this.setState({isSnackbarActive: true});
@@ -131,9 +131,9 @@ class App extends Component {
         );
       }
       this.setNewStory(story);
-    }  
+    }
   }
-  
+
   setNewStory(story) {
     this.setState({
       currentStory: null,
@@ -143,11 +143,11 @@ class App extends Component {
       this.setState({currentStory: story});
     }.bind(this), 100);
   }
-  
+
   handleSnackbarRequestClose() {
     this.setState({isSnackbarActive: false});
   }
-  
+
   render() {
     const styles = {
       popupContainer: {
@@ -164,7 +164,9 @@ class App extends Component {
         zIndex: 1
       },
       bottomNavigation: {
-        marginTop: '544px',
+        width: '55%',
+        position: 'absolute',
+        bottom: '0px',
         boxShadow: 'rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px'
       },
       tabs: {
@@ -192,7 +194,7 @@ class App extends Component {
         transform: 'translate(0%, -50%)'
       }
     };
-    
+
     var currentTab;
     switch(this.state.currentTabIndex) {
       case 0:
@@ -228,7 +230,7 @@ class App extends Component {
       );
       break;
     }
-    
+
     return (
       <div style={styles.popupContainer}>
         <div style={styles.friendsStoriesList}>
@@ -255,7 +257,7 @@ class App extends Component {
                       currentStory: null,
                       isSearchActive: true
                     });
-                    AnalyticsUtil.track("Search Button Clicked"); 
+                    AnalyticsUtil.track("Search Button Clicked");
                   }}>
                   <ActionSearchIcon color={TAB_TEXT_COLOR_DARK_GRAY}/>
                 </IconButton>
@@ -266,7 +268,7 @@ class App extends Component {
                   tooltipPosition="bottom-center"
                   onClick={()=> {
                     this.props.dispatch({type: 'launch-popup'});
-                    AnalyticsUtil.track("Popout Button Clicked"); 
+                    AnalyticsUtil.track("Popout Button Clicked");
                   }}>
                   <OpenInNewIcon color={TAB_TEXT_COLOR_DARK_GRAY}/>
                 </IconButton>
@@ -300,18 +302,18 @@ class App extends Component {
               onTouchTap={() => this.handleTabChange(3)}
               />
           </BottomNavigation>
-          
+
         </div>
         <div style={styles.friendsStoryContainer}>
           {this.state.currentStory != null && this.state.currentStory}
           {this.state.isSearchActive && <SearchPage onSelectStory={(story) => this.changeStory(story)}/>}
-          
+
           <Snackbar
             open={this.state.isSnackbarActive}
             autoHideDuration={3000}
             onRequestClose={() => this.handleSnackbarRequestClose()}
             message="No story available"/>
-          
+
         </div>
       </div>
     );
