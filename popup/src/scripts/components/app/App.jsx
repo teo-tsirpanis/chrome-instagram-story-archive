@@ -182,8 +182,7 @@ class App extends Component {
       },
       friendsStoryContainer: {
         minHeight: POPUP_CONTAINER_HEIGHT + 'px',
-        marginLeft: '55%',
-        backgroundColor: '#FAFAFA'
+        marginLeft: '55%'
       },
       loadingIndicator: {
         position: 'sticky',

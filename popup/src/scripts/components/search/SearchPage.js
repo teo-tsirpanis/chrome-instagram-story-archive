@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import {connect} from 'react-redux';
 import AppBar from 'material-ui/AppBar';
 import TextField from 'material-ui/TextField';
 import ActionSearchIcon from 'material-ui/svg-icons/action/search';
@@ -27,15 +28,26 @@ class SearchPage extends Component {
     this.state = {
       currentTabIndex: 0,
       isSearchResultsActive: false,
+      isFullPopup: false,
       searchQuery: ''
     }
   }
-  
+
+  componentDidMount() {
+    if(this.props.currentStoryItem != null || this.props.isFullPopup) {
+      this.setState({isFullPopup: true});
+      this.props.dispatch({
+        type: 'SET_IS_FULL_POPUP',
+        isFullPopup: false
+      });
+    }
+  }
+
   handleTabChange = (value) => {
     this.setState({currentTabIndex: value});
     AnalyticsUtil.track("Search " + tabNames[value] + " Tab Selected", {"query": this.state.searchQuery});
   };
-  
+
   handleSplashSearchKeyPress(e) {
     var itself = this;
     if(e.key === 'Enter') {
@@ -55,7 +67,7 @@ class SearchPage extends Component {
       });
     }
   }
-  
+
   handleSplashSearch() {
     var searchQuery = this.refs.splashSearchQuery.getValue();
     if(searchQuery.length === 0) {
@@ -72,7 +84,7 @@ class SearchPage extends Component {
       searchQuery: searchQuery
     });
   }
-  
+
   handleSearch() {
     var searchQuery = this.refs.searchQuery.getValue();
     if(searchQuery.length === 0) {
@@ -88,7 +100,7 @@ class SearchPage extends Component {
       searchQuery: searchQuery
     });
   }
-  
+
   handleSearchKeyPress(e) {
     if(e.key === 'Enter') {
       var searchQuery = this.refs.searchQuery.getValue();
@@ -106,7 +118,7 @@ class SearchPage extends Component {
       });
     }
   }
-  
+
   render() {
     const styles = {
       searchBar: {
@@ -125,11 +137,15 @@ class SearchPage extends Component {
       searchContainer: {
         position: 'absolute',
         top: '50%',
-        transform: 'translate(0%, -50%)'
+        transform: (this.state.isFullPopup) ? 'translate(50%, -50%)' : 'translate(0%, -50%)'
       },
       searchAppBar: {
         backgroundColor: TAB_BACKGROUND_COLOR_WHITE,
         height: '56px'
+      },
+      splashSearchField: {
+        marginLeft: (this.state.isFullPopup) ? '10px' : 'inherit',
+        marginRight: (this.state.isFullPopup) ? '10px' : 'inherit'
       },
       searchTabs: {
         boxShadow: 'rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px',
@@ -144,16 +160,16 @@ class SearchPage extends Component {
         color: TAB_TEXT_COLOR_LIGHT_GRAY
       }
     };
-    
+
     styles.tab = [];
     styles.tab[0] = styles.activeTab;
     styles.tab[1] = styles.activeTab;
     styles.tab[2] = styles.activeTab;
     styles.tab[this.state.currentTabIndex] = Object.assign({}, styles.tab[this.state.currentTabIndex], styles.defaultTab);
-    
+
     return (
       <div>
-        
+
         {this.state.isSearchResultsActive &&
           <div>
             <AppBar
@@ -163,6 +179,7 @@ class SearchPage extends Component {
                   ref="searchQuery"
                   hintText="Search"
                   onKeyPress={(e) => this.handleSearchKeyPress(e)}
+                  style={{width: '100%'}}
                   defaultValue={this.state.searchQuery}
                   />
               }
@@ -178,7 +195,7 @@ class SearchPage extends Component {
               }
               zDepth={0}
               />
-            
+
             <Tabs
               value={this.state.currentTabIndex}
               onChange={this.handleTabChange}
@@ -187,6 +204,7 @@ class SearchPage extends Component {
                 <PeopleSearchTab
                   onSelectStory={(story) => this.props.onSelectStory(story)}
                   searchQuery={this.state.searchQuery}
+                  isFullPopup={this.state.isFullPopup}
                   />
               </Tab>
               <Tab value={1} style={styles.tab[1]}
@@ -195,6 +213,7 @@ class SearchPage extends Component {
                   <HashtagSearchTab
                     onSelectStory={(story) => this.props.onSelectStory(story)}
                     searchQuery={this.state.searchQuery}
+                    isFullPopup={this.state.isFullPopup}
                     />
                 </div>
               </Tab>
@@ -204,13 +223,14 @@ class SearchPage extends Component {
                   <LocationSearchTab
                     onSelectStory={(story) => this.props.onSelectStory(story)}
                     searchQuery={this.state.searchQuery}
+                    isFullPopup={this.state.isFullPopup}
                     />
                 </div>
               </Tab>
             </Tabs>
           </div>
         }
-        
+
         {!this.state.isSearchResultsActive &&
           <div style={styles.searchContainer}>
             <Paper style={styles.searchBar} zDepth={2}>
@@ -218,9 +238,10 @@ class SearchPage extends Component {
                 autoFocus
                 ref="splashSearchQuery"
                 hintText="Username, hashtag, or place"
+                style={styles.splashSearchField}
                 onKeyPress={(e) => this.handleSplashSearchKeyPress(e)}
                 />
-              
+
               <FlatButton
                 label="Search"
                 secondary={true}
@@ -228,7 +249,7 @@ class SearchPage extends Component {
                 onClick={(e) => this.handleSplashSearch(e)}
                 />
             </Paper>
-            
+
             <p style={styles.searchAlternativeText}>or select a story from the list on the left side</p>
           </div>
         }
@@ -237,4 +258,11 @@ class SearchPage extends Component {
   }
 }
 
-export default SearchPage;
+const mapStateToProps = (state) => {
+  return {
+    currentStoryItem: state.popup.currentStoryItem,
+    isFullPopup: state.popup.isFullPopup
+  };
+};
+
+export default connect(mapStateToProps)(SearchPage);

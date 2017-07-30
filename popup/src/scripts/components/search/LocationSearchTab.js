@@ -45,7 +45,7 @@ class LocationSearchTab extends Component {
         minHeight: TAB_CONTAINER_HEIGHT + 'px',
         overflowX: 'hidden',
         overflowY: 'auto',
-        height: (this.state.isFullPopup) ?  $(window).height() - 112 : TAB_CONTAINER_HEIGHT + 'px',
+        height: (this.props.isFullPopup) ?  $(window).height() - 112 : TAB_CONTAINER_HEIGHT + 'px',
       },
       refreshIndicator: {
         position: 'relative',
