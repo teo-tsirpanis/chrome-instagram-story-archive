@@ -238,13 +238,14 @@ class App extends Component {
             style={styles.appBar}>
             <ToolbarGroup firstChild={true}>
               <Avatar
-                src="../img/matcha-logo.png"
-                style={{backgroundColor: 'transparent', cursor: 'pointer', borderRadius: '0px', marginLeft: '15px'}}
-                onClick={()=> window.open('https://watchmatcha.com/')}/>
+                src="../img/icon-128.png"
+                style={{backgroundColor: 'transparent', borderRadius: '0px', marginLeft: '15px'}}
+                />
               <ListItem
                 primaryText="Chrome IG Story"
-                secondaryText="powered by Matcha"
-                style={{paddingLeft: '10px', paddingTop: '15px'}}
+                secondaryText="by Alec Garcia"
+                style={{paddingLeft: '10px', paddingTop: '15px', cursor: 'pointer'}}
+                onClick={()=> window.open('https://github.com/CaliAlec/ChromeIGStory')}
                 disabled={true}/>
             </ToolbarGroup>
             <ToolbarGroup lastChild={true}>
