@@ -13,19 +13,19 @@ class StoriesTray extends Component {
       return this.props.exploreStories;
     }
   }
-  
+
   viewUserStory(index) {
     var story = this.getStoryItems()[index];
     this.props.onStoryClicked(story);
   }
-  
+
   onDownloadStory(index) {
     var storyItem = this.getStoryItems()[index];
     InstagramApi.getStory(storyItem.id).then(function(story) {
       downloadStory(story);
     });
   }
-  
+
   render() {
     const storyTrayItems = this.getStoryItems().map((storyTrayItem, key) => {
       var story = this.getStoryItems()[key];
@@ -40,20 +40,23 @@ class StoriesTray extends Component {
           onDownloadStory={(index) => this.onDownloadStory(index)}
           />
       )});
-      
+
       return (
-        <div className="trayContainer">
-          {storyTrayItems}
+        <div>
+          <div className="trayContainer">
+            {storyTrayItems}
+          </div>
+          <div className="trayContainerEdgeFade"></div>
         </div>
       )
     }
   }
-  
+
   const mapStateToProps = (state) => {
     return {
       friendStories: state.stories.friendStories.tray,
       exploreStories: state.stories.exploreStories.tray,
     };
   };
-  
+
   export default connect(mapStateToProps)(StoriesTray);
