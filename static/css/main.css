@@ -63,12 +63,11 @@
   display: block;
   text-align: center;
   margin-bottom: 20px;
-  max-height: 130px;
+  max-height: 145px;
   overflow-x: auto;
   overflow-y: hidden;
   white-space: nowrap;
 }
-
 
 .trayItemImage {
   width: 64px;
@@ -81,11 +80,22 @@
   cursor: pointer;
 }
 
+.liveTrayItemImage {
+  width: 72px;
+  height: 72px;
+  margin: auto;
+  border-radius: 50%;
+  margin-left: 5px;
+  margin-right: 5px;
+  padding: 3px;
+  cursor: pointer;
+}
+
 .trayContainer {
   display: block;
   text-align: center;
   margin-bottom: 20px;
-  max-height: 130px;
+  max-height: 145px;
   overflow-x: auto;
   overflow-y: hidden;
   white-space: nowrap;
@@ -257,4 +267,42 @@
 
 .tabs-container .tab > div > div svg {
   fill: #626262 !important;
+}
+
+.pulse {
+  display: block;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #000000;
+  cursor: pointer;
+  box-shadow: 0 0 0 rgba(255, 255, 255, 0.6);
+  animation: pulse 2s infinite;
+}
+
+@-webkit-keyframes pulse {
+  0% {
+    -webkit-box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.6);
+  }
+  70% {
+    -webkit-box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+  }
+  100% {
+    -webkit-box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    -moz-box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.6);
+  }
+  70% {
+    -moz-box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+  }
+  100% {
+    -moz-box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
 }

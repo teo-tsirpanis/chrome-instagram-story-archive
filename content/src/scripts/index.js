@@ -6,7 +6,8 @@ import injectTapEventPlugin from 'react-tap-event-plugin';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import StoriesTray from './components/app/StoriesTray';
 import InstagramApi from '../../../utils/InstagramApi';
-import {getTimeElapsed, downloadStory} from '../../../utils/Utils';
+import {getTimeElapsed, downloadStory, getLiveVideoManifestObject} from '../../../utils/Utils';
+import { MediaPlayer } from 'dashjs';
 import PhotoSwipe from 'photoswipe';
 import PhotoSwipeUI_Default from "../../../node_modules/photoswipe/dist/photoswipe-ui-default.min.js";
 import "../../../node_modules/photoswipe/dist/photoswipe.css";
@@ -125,7 +126,14 @@ function injectUserStory(instagramUserImage, story) {
 // dispatch the selected story to the store
 function onStoryClicked(currentStoryItem) {
   // proxyStore.dispatch({type: 'story-clicked-alias', currentStoryItem: currentStoryItem});
-  if(currentStoryItem.items) {
+  
+  if(currentStoryItem.broadcasts || currentStoryItem.broadcast_owner) {
+    if(currentStoryItem.broadcasts) {
+      showImageGallery(currentStoryItem.broadcasts);
+    } else {
+      showImageGallery(currentStoryItem);
+    }
+  } else if(currentStoryItem.items) {
     // if there are new Story images available, show them in the gallery
     showImageGallery(currentStoryItem.items);
   } else {
@@ -162,39 +170,57 @@ function showImageGallery(storyItems) {
   // retrieve the injected pswpElement
   getPswpElement(function(pswpElement) {
     var slides = [];
-    
-    storyItems.map((storyItem, i) => {
-      // if videos are available, create a new HTML slide containing the Story video
-      if(storyItem['video_versions']) {
-        var video = storyItem['video_versions'][0];
-        
-        var storyVideo = document.createElement('video');
-        var source = document.createElement("source");
-        storyVideo.setAttribute("controls", true);
-        if(i === 0) { storyVideo.setAttribute("autoplay", true); }
-        source.src = video['url'];
-        storyVideo.appendChild(source);
-        $(storyVideo).addClass('videoStoryItem');
-        $(storyVideo).addClass('pswp__video active');
-        $(storyVideo).css('position', 'absolute');
-        
-        slides.push({
-          html: storyVideo,
-          storyItem: storyItem
-        });
-      } else {
-        // create a normal slide with the Story image
-        var image = storyItem['image_versions2']['candidates'][0];
-        var url = image['url'].replace("http://", "https://");
-        slides.push({
-          src: url,
-          msrc: url,
-          w: image['width'],
-          h: image['height'],
-          storyItem: storyItem
-        });
-      }
-    });
+    if(storyItems.dash_playback_url) {
+      var storyVideo = document.createElement('video');
+      storyVideo.id = "liveVideoPlayer";
+      $(storyVideo).css('width', '100%');
+      slides.push({
+        html: storyVideo,
+        storyItem: storyItems
+      });
+    } else {
+      storyItems.map((storyItem, i) => {
+        if(storyItem.dash_manifest) {
+          var storyVideo = document.createElement('video');
+          storyVideo.id = "liveVideoPlayer";
+          $(storyVideo).css('width', '100%');
+          slides.push({
+            html: storyVideo,
+            storyItem: storyItem
+          });
+        } else 
+        // if videos are available, create a new HTML slide containing the Story video
+        if(storyItem['video_versions']) {
+          var video = storyItem['video_versions'][0];
+          
+          var storyVideo = document.createElement('video');
+          var source = document.createElement("source");
+          storyVideo.setAttribute("controls", true);
+          if(i === 0) { storyVideo.setAttribute("autoplay", true); }
+          source.src = video['url'];
+          storyVideo.appendChild(source);
+          $(storyVideo).addClass('videoStoryItem');
+          $(storyVideo).addClass('pswp__video active');
+          $(storyVideo).css('position', 'absolute');
+          
+          slides.push({
+            html: storyVideo,
+            storyItem: storyItem
+          });
+        } else {
+          // create a normal slide with the Story image
+          var image = storyItem['image_versions2']['candidates'][0];
+          var url = image['url'].replace("http://", "https://");
+          slides.push({
+            src: url,
+            msrc: url,
+            w: image['width'],
+            h: image['height'],
+            storyItem: storyItem
+          });
+        }
+      });
+    }
     
     var options = {
       closeOnScroll: false,
@@ -205,34 +231,49 @@ function showImageGallery(storyItems) {
     
     // update the Story author's username and profile picture
     gallery.listen('afterChange', function() {
-      
-      var currItem = $(gallery.currItem.container);
-      
-      var storyAuthorImage = currItem.find('.storyAuthorImage');
-      var storyAuthorUsername = currItem.find('.storyAuthorUsername');
-      
-      // only add the Story author's username/profile picture to the current slide if it doesn't already exist
-      if(storyAuthorImage.length == 0 && storyAuthorUsername.length == 0) {
-        storyAuthorImage = document.createElement('img');
-        storyAuthorImage.setAttribute("class", "storyAuthorImage");
-        storyAuthorImage.style.position = 'absolute';
+      var currentItem = gallery.currItem.storyItem;
+      if(currentItem.broadcasts || currentItem.broadcast_owner) {
+        let player = MediaPlayer().create();
+        if(currentItem.dash_manifest) {
+          let url = gallery.currItem.storyItem.dash_manifest;
+          player.initialize(document.querySelector('#liveVideoPlayer'));
+          // a post-live video object contains a string representation of the manifest that needs to be parsed
+          var manifestObject = getLiveVideoManifestObject(url);
+          player.attachSource(manifestObject);
+        } else {
+          let url = gallery.currItem.storyItem.dash_playback_url;
+          player.initialize(document.querySelector('#liveVideoPlayer'), url, true);
+        }
+        player.getDebug().setLogToBrowserConsole(false);
+        player.play();
+      } else {
+        var currItem = $(gallery.currItem.container);
         
-        storyAuthorUsername = document.createElement('span');
-        storyAuthorUsername.setAttribute("class", "storyAuthorUsername");
-        storyAuthorUsername.style.position = 'absolute';
+        var storyAuthorImage = currItem.find('.storyAuthorImage');
+        var storyAuthorUsername = currItem.find('.storyAuthorUsername');
         
-        $(currItem).append(storyAuthorImage);
-        $(currItem).append(storyAuthorUsername);
+        // only add the Story author's username/profile picture to the current slide if it doesn't already exist
+        if(storyAuthorImage.length == 0 && storyAuthorUsername.length == 0) {
+          storyAuthorImage = document.createElement('img');
+          storyAuthorImage.setAttribute("class", "storyAuthorImage");
+          storyAuthorImage.style.position = 'absolute';
+          
+          storyAuthorUsername = document.createElement('span');
+          storyAuthorUsername.setAttribute("class", "storyAuthorUsername");
+          storyAuthorUsername.style.position = 'absolute';
+          
+          $(currItem).append(storyAuthorImage);
+          $(currItem).append(storyAuthorUsername);
+        }
+        
+        $(storyAuthorImage).attr("src", currentItem['user']['profile_pic_url']);
+        $(storyAuthorUsername).text(currentItem['user']['username'] + " - " + getTimeElapsed(currentItem['taken_at']));
+        
+        if(currentItem['video_versions']) {
+          $(storyAuthorImage).css("top", "45px");
+          $(storyAuthorUsername).css("top", "55px");
+        }
       }
-      
-      $(storyAuthorImage).attr("src", gallery.currItem.storyItem['user']['profile_pic_url']);
-      $(storyAuthorUsername).text(gallery.currItem.storyItem['user']['username'] + " - " + getTimeElapsed(gallery.currItem.storyItem['taken_at']));
-      
-      if(gallery.currItem.storyItem['video_versions']) {
-        $(storyAuthorImage).css("top", "45px");
-        $(storyAuthorUsername).css("top", "55px");
-      }
-      
     });
     
     // handle playing/pausing videos while traversing the gallery

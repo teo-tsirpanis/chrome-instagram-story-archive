@@ -44,13 +44,16 @@ class StoryTrayItem extends Component {
       trayItemUsername: {
         marginTop: '10px',
         fontSize: '14px',
-        color: '#262626'
+        color: (this.props.storyItem.seen === 0) ? '#262626' : "#999999"
       }
     }  
+    
+    var seenClass = (this.props.storyItem.seen === 0) ? "unseenStoryItem" : "seenStoryItem";
+    
     return (
       <div ref="TrayItemContainer" style={styles.trayItemContainer} className={(this.props.storyItem.muted) ? "mutedStoryItem" : ""}>
-        {this.props.trayItemIcon}
-        <span style={styles.trayItemUsername}>{this.props.trayItemUsername.substr(0, 10) + (this.props.trayItemUsername.length > 10 ? '…' : '')}</span>
+        <img className={"trayItemImage " + seenClass} src={this.props.storyItem.user.profile_pic_url} onClick={() => this.props.onViewUserStory(this.props.storyItem)}/>
+        <span style={styles.trayItemUsername}>{this.props.storyItem.user.username.substr(0, 10) + (this.props.storyItem.user.username.length > 10 ? '…' : '')}</span>
         <Popover
           open={this.state.isRightClickMenuActive}
           anchorEl={this.state.rightClickMenuAnchor}
