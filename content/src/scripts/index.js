@@ -18,13 +18,14 @@ import $ from 'jquery';
 import {
   INSTAGRAM_FEED_CLASS_NAME,
   INSTAGRAM_EXPLORE_FEED_CLASS_NAME,
+  INSTAGRAM_LOCATION_FEED_CLASS_NAME,
   INSTAGRAM_USER_IMAGE_CLASS_NAME_CONTAINER,
   INSTAGRAM_USER_IMAGE_CLASS_NAME,
   INSTAGRAM_USER_USERNAME_CLASS_NAME,
   muiTheme
 } from '../../../utils/Constants';
 
-var instagramFeed, instagramExploreFeed, instagramUserImage, instagramUserImageContainer, instagramUserUsername;
+var instagramFeed, instagramExploreFeed, instagramLocationFeed, instagramUserImage, instagramUserImageContainer, instagramUserUsername;
 const proxyStore = new Store({portName: 'chrome-ig-story'});
 
 // Needed for onTouchTap
@@ -50,6 +51,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 function injectContentScript() {
   instagramFeed = document.getElementsByClassName(INSTAGRAM_FEED_CLASS_NAME)[0];
   instagramExploreFeed = document.getElementsByClassName(INSTAGRAM_EXPLORE_FEED_CLASS_NAME)[0];
+  instagramLocationFeed = document.getElementsByClassName(INSTAGRAM_LOCATION_FEED_CLASS_NAME)[0];
   instagramUserImageContainer = document.getElementsByClassName(INSTAGRAM_USER_IMAGE_CLASS_NAME_CONTAINER)[0];
   instagramUserImage = document.getElementsByClassName(INSTAGRAM_USER_IMAGE_CLASS_NAME)[0];
   instagramUserUsername = document.getElementsByClassName(INSTAGRAM_USER_USERNAME_CLASS_NAME)[0];
@@ -61,6 +63,13 @@ function injectContentScript() {
   } else if (instagramUserImageContainer) {
     if(!$(instagramUserImageContainer).hasClass("instagramUserImage")) {
       getUserStory(instagramUserImage);
+    }
+  } else if(instagramLocationFeed) {
+    var url = window.location.href;
+    var matchGroup = url.match(/([\d]+)/g);
+    if(matchGroup[0]) {
+      var locationId = matchGroup[0];
+      getLocationStory(locationId);
     }
   }
 }
@@ -75,6 +84,15 @@ function getUserStory(instagramUserImage) {
     InstagramApi.getStory(user.pk, (story) => {
       injectUserStory(instagramUserImage, story);
     });
+  });
+}
+
+// fetch location's Story and inject it into its feed page if it's available
+function getLocationStory(locationId) {
+  InstagramApi.getLocationStory(locationId, (story) => {
+    if(story) {
+      injectLocationStory(story);
+    }
   });
 }
 
@@ -120,6 +138,33 @@ function injectUserStory(instagramUserImage, story) {
         downloadStory(story);
       });
     });
+  }
+}
+
+// inject the story for a particular location while on its feed page e.g. Instagram.com/explore/locations/locationId
+function injectLocationStory(story) {
+  if(!document.getElementById("locationStoryIconContainer")) {
+    const locationStoryIconContainer = document.createElement('div');
+    const locationStoryIcon = document.createElement('img');
+    const locationIcon = document.createElement('img');
+    locationStoryIconContainer.id = "locationStoryIconContainer";
+    $(locationStoryIconContainer).addClass('locationStoryIconContainer');
+    $(locationStoryIconContainer).addClass('unseenStoryItem');
+    $(locationStoryIcon).addClass('locationStoryIcon');
+    $(locationStoryIcon).addClass('center-div');
+    $(locationStoryIcon).attr("src", story.owner.profile_pic_url);
+    $(locationIcon).addClass('locationIcon');
+    $(locationIcon).attr("src", chrome.extension.getURL('img/icon_location.png'));
+    $(locationStoryIconContainer).append(locationStoryIcon);
+    $(locationStoryIconContainer).append(locationIcon);
+    locationStoryIconContainer.addEventListener("click", function() {
+      onStoryClicked(story);
+    });
+    locationStoryIconContainer.addEventListener("contextmenu", function(ev) {
+      ev.preventDefault();
+      downloadStory(story);
+    });
+    instagramLocationFeed.insertBefore(locationStoryIconContainer, instagramLocationFeed.childNodes[0]);
   }
 }
 

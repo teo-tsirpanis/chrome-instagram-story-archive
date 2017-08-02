@@ -59,6 +59,30 @@
   bottom: 0px;
 }
 
+.locationIcon {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  bottom: 0px;
+  right: 2px;
+  margin-bottom: -5px;
+}
+
+.locationStoryIconContainer {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  margin: 0 auto;
+  margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.locationStoryIcon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+}
+
 #trayContainer {
   display: block;
   text-align: center;
