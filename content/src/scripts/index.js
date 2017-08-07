@@ -19,13 +19,15 @@ import {
   INSTAGRAM_FEED_CLASS_NAME,
   INSTAGRAM_EXPLORE_FEED_CLASS_NAME,
   INSTAGRAM_LOCATION_FEED_CLASS_NAME,
+  INSTAGRAM_HASHTAG_FEED_CLASS_NAME,
+  INSTAGRAM_HASHTAG_NAME_CLASS_NAME,
   INSTAGRAM_USER_IMAGE_CLASS_NAME_CONTAINER,
   INSTAGRAM_USER_IMAGE_CLASS_NAME,
   INSTAGRAM_USER_USERNAME_CLASS_NAME,
   muiTheme
 } from '../../../utils/Constants';
 
-var instagramFeed, instagramExploreFeed, instagramLocationFeed, instagramUserImage, instagramUserImageContainer, instagramUserUsername;
+var instagramFeed, instagramExploreFeed, instagramLocationFeed, instagramHashtagFeed, instagramHashtagName, instagramUserImage, instagramUserImageContainer, instagramUserUsername;
 const proxyStore = new Store({portName: 'chrome-ig-story'});
 
 // Needed for onTouchTap
@@ -52,6 +54,8 @@ function injectContentScript() {
   instagramFeed = document.getElementsByClassName(INSTAGRAM_FEED_CLASS_NAME)[0];
   instagramExploreFeed = document.getElementsByClassName(INSTAGRAM_EXPLORE_FEED_CLASS_NAME)[0];
   instagramLocationFeed = document.getElementsByClassName(INSTAGRAM_LOCATION_FEED_CLASS_NAME)[0];
+  instagramHashtagFeed = document.getElementsByClassName(INSTAGRAM_HASHTAG_FEED_CLASS_NAME)[0];
+  instagramHashtagName = document.getElementsByClassName(INSTAGRAM_HASHTAG_NAME_CLASS_NAME)[0];
   instagramUserImageContainer = document.getElementsByClassName(INSTAGRAM_USER_IMAGE_CLASS_NAME_CONTAINER)[0];
   instagramUserImage = document.getElementsByClassName(INSTAGRAM_USER_IMAGE_CLASS_NAME)[0];
   instagramUserUsername = document.getElementsByClassName(INSTAGRAM_USER_USERNAME_CLASS_NAME)[0];
@@ -71,6 +75,10 @@ function injectContentScript() {
       var locationId = matchGroup[0];
       getLocationStory(locationId);
     }
+  } else if(instagramHashtagFeed) {
+    var hashtag = instagramHashtagName.innerText;
+    hashtag = hashtag.replace('#', '');
+    getHashtagStory(hashtag);
   }
 }
 
@@ -92,6 +100,15 @@ function getLocationStory(locationId) {
   InstagramApi.getLocationStory(locationId, (story) => {
     if(story) {
       injectLocationStory(story);
+    }
+  });
+}
+
+// fetch hashtag's Story and inject it into its feed page if it's available
+function getHashtagStory(hashtag) {
+  InstagramApi.getHashtagStory(hashtag, (story) => {
+    if(story) {
+      injectHashtagStory(story);
     }
   });
 }
@@ -165,6 +182,33 @@ function injectLocationStory(story) {
       downloadStory(story);
     });
     instagramLocationFeed.insertBefore(locationStoryIconContainer, instagramLocationFeed.childNodes[0]);
+  }
+}
+
+// inject the story for a particular hashtag while on its feed page e.g. Instagram.com/explore/tags/hashtagName
+function injectHashtagStory(story) {
+  if(!document.getElementById("hashtagStoryIconContainer")) {
+    const hashtagStoryIconContainer = document.createElement('div');
+    const hashtagStoryIcon = document.createElement('img');
+    const hashtagIcon = document.createElement('img');
+    hashtagStoryIconContainer.id = "hashtagStoryIconContainer";
+    $(hashtagStoryIconContainer).addClass('hashtagStoryIconContainer');
+    $(hashtagStoryIconContainer).addClass('unseenStoryItem');
+    $(hashtagStoryIcon).addClass('hashtagStoryIcon');
+    $(hashtagStoryIcon).addClass('center-div');
+    $(hashtagStoryIcon).attr("src", story.owner.profile_pic_url);
+    $(hashtagIcon).addClass('hashtagIcon');
+    $(hashtagIcon).attr("src", chrome.extension.getURL('img/icon_hashtag.png'));
+    $(hashtagStoryIconContainer).append(hashtagStoryIcon);
+    $(hashtagStoryIconContainer).append(hashtagIcon);
+    hashtagStoryIconContainer.addEventListener("click", function() {
+      onStoryClicked(story);
+    });
+    hashtagStoryIconContainer.addEventListener("contextmenu", function(ev) {
+      ev.preventDefault();
+      downloadStory(story);
+    });
+    instagramHashtagFeed.insertBefore(hashtagStoryIconContainer, instagramHashtagFeed.childNodes[0]);
   }
 }
 
