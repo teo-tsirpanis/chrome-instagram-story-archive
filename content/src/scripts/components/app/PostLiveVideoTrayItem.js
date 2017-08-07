@@ -46,7 +46,7 @@ class PostLiveVideoTrayItem extends Component {
       trayItemUsername: {
         marginTop: '10px',
         fontSize: '14px',
-        color: (this.props.storyItem.seen === 0) ? '#262626' : "#999999"
+        color: (this.props.storyItem.last_seen_broadcast_ts === 0) ? '#262626' : "#999999"
       },
       trayItemIcon: {
         width: '42px',
@@ -72,15 +72,15 @@ class PostLiveVideoTrayItem extends Component {
       }
     }  
     
-    var seenClass = (this.props.storyItem.seen === 0) ? "unseenStoryItem" : "seenStoryItem";
-    var postLiveIcon = (this.props.storyItem.seen === 0) ? chrome.extension.getURL('img/icon_post_live.png') : chrome.extension.getURL('img/icon_post_live_seen.png');
+    var seenClass = (this.props.storyItem.last_seen_broadcast_ts === 0) ? "unseenStoryItem" : "seenStoryItem";
+    var postLiveIcon = (this.props.storyItem.last_seen_broadcast_ts === 0) ? chrome.extension.getURL('img/icon_post_live.png') : chrome.extension.getURL('img/icon_post_live_seen.png');
     
     return (
       <div ref="TrayItemContainer" style={styles.trayItemContainer} className={(this.props.storyItem.muted) ? "mutedStoryItem" : ""}>
         <div className={"liveTrayItemImage " + seenClass}>
           <img className="center-div" style={styles.trayItemIcon} src={this.props.storyItem.user.profile_pic_url} onClick={() => this.props.onViewUserStory(this.props.storyItem)}/>
           <div className="center-div" style={styles.blackCircle}></div>
-          {this.props.storyItem.seen === 0 && <span className="pulse center-div" style={styles.livePulse}></span>}
+          {this.props.storyItem.last_seen_broadcast_ts === 0 && <span className="pulse center-div" style={styles.livePulse}></span>}
           <img src={postLiveIcon} className="center-div" style={styles.postLiveIcon} color='#a31391'/>
         </div>
         
