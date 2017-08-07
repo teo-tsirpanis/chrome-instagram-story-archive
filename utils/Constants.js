@@ -10,14 +10,14 @@ export const TOP_LIVE_API = API_BASE + "discover/top_live/";
 export const LIVE_API = API_BASE + "live/";
 
 // Instagram website class names
-export const INSTAGRAM_FEED_CLASS_NAME = "_qj7yb";
+export const INSTAGRAM_FEED_CLASS_NAME = "_owark";
 export const INSTAGRAM_EXPLORE_FEED_CLASS_NAME = "_oyz6j";
-export const INSTAGRAM_LOCATION_FEED_CLASS_NAME = "_9jh5a";
-export const INSTAGRAM_HASHTAG_FEED_CLASS_NAME = "_1l53n";
-export const INSTAGRAM_HASHTAG_NAME_CLASS_NAME = "_totu9";
-export const INSTAGRAM_USER_IMAGE_CLASS_NAME_CONTAINER = "_8gpiy _r43r5";
-export const INSTAGRAM_USER_IMAGE_CLASS_NAME = "_iv4d5";
-export const INSTAGRAM_USER_USERNAME_CLASS_NAME = "_i572c notranslate";
+export const INSTAGRAM_LOCATION_FEED_CLASS_NAME = "_5b1eb";
+export const INSTAGRAM_HASHTAG_FEED_CLASS_NAME = "_j5dqo";
+export const INSTAGRAM_HASHTAG_NAME_CLASS_NAME = "_kwqc3";
+export const INSTAGRAM_USER_IMAGE_CLASS_NAME_CONTAINER = "_l8yre _qdmzb";
+export const INSTAGRAM_USER_IMAGE_CLASS_NAME = "_9bt3u";
+export const INSTAGRAM_USER_USERNAME_CLASS_NAME = "_rf3jb notranslate";
 
 // UI colors
 export const TAB_TEXT_COLOR_GREEN = "#5DBA99";
