@@ -12,7 +12,7 @@ import JSONbig from 'json-bigint';
 
 // fetch a particular user's story
 function getStory(userId, callback) {
-  return fetch(`${FEED_API}user/${userId}/reel_media/`, {
+  return fetch(`${FEED_API}user/${userId}/story/`, {
     accept: 'application/json',
     credentials: 'include'
   }).then(checkStatus)
@@ -153,7 +153,7 @@ function getLiveVideoComments(id, timestamp, callback) {
 }
 
 // fetch the comments for a post-live video
-function getPostLiveVideoComments(id, timestamp, callback) {
+function getLiveVideoReplayComments(id, timestamp, callback) {
   var LIVE_API_URL = `${LIVE_API}${id}/get_post_live_comments/?starting_offset=${timestamp}&encoding_tag=instagram_dash_remuxed`;
   return fetch(LIVE_API_URL, {
     accept: 'application/json',
@@ -207,7 +207,7 @@ const InstagramApi = {
   getTopLiveVideos,
   getLiveVideoInfo,
   getLiveVideoComments,
-  getPostLiveVideoComments,
+  getLiveVideoReplayComments,
   getUserInfo,
   searchForUser,
   searchForHashtag,

@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import CircularProgress from 'material-ui/CircularProgress';
 import RefreshIndicator from 'material-ui/RefreshIndicator';
-import PostLiveFriendVideosList from './PostLiveFriendVideosList';
+import LiveFriendVideoReplaysList from './LiveFriendVideoReplaysList';
 import LiveFriendVideosList from './LiveFriendVideosList';
 import FriendStoriesList from './FriendStoriesList';
 import $ from 'jquery';
@@ -61,7 +61,7 @@ class FriendsTab extends Component {
         }
         
         {this.props.friendStories.post_live && 
-          <PostLiveFriendVideosList
+          <LiveFriendVideoReplaysList
             friendStories={this.props.friendStories}
             onSelectStory={(story) => this.props.onSelectStory(story)}/>
         }

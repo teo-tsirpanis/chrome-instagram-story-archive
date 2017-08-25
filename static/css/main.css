@@ -34,15 +34,13 @@
 .storyAuthorImage {
   width: 32px;
   height: 32px;
-  left: 10px;
-  top: 15px;
+  left: 70px;
   border-radius: 50%;
   z-index: 1;
 }
 
 .storyAuthorUsername {
-  left: 55px;
-  top: 25px;
+  left: 110px;
   color: white;
   z-index: 1;
 }
@@ -104,15 +102,30 @@
   cursor: pointer;
 }
 
-.liveTrayItemImage {
-  width: 72px;
-  height: 72px;
+.liveTrayItemImage, .liveUserItemImage {
   margin: auto;
   border-radius: 50%;
   margin-left: 5px;
   margin-right: 5px;
   padding: 3px;
   cursor: pointer;
+}
+
+.liveTrayItemImage {
+  width: 72px;
+  height: 72px;
+}
+
+.liveUserItemImage {
+  width: 152px;
+  height: 152px;
+}
+
+@media screen and (max-width: 735px) {
+  .liveUserItemImage {
+    width: 72px;
+    height: 72px;
+  }
 }
 
 .trayContainer {
@@ -130,6 +143,7 @@
   height: 130px;
   position: absolute;
   right: 0px;
+  pointer-events: none;
   background: -moz-linear-gradient(left, rgba(255,255,255,0) 0%, rgba(250,250,250,1) 100%); /* FF3.6-15 */
   background: -webkit-linear-gradient(left, rgba(255,255,255,0) 0%,rgba(250,250,250,1) 100%); /* Chrome10-25,Safari5.1-6 */
   background: linear-gradient(to right, rgba(255,255,255,0) 0%,rgba(250,250,250,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
@@ -237,6 +251,12 @@
   transform: translate(-50%, -50%);
 }
 
+.center-vertical {
+  position: absolute;
+  top: 50%;
+  transform: translate(0%, -50%);
+}
+
 .liveStoryInfoSpan {
   position: absolute;
   color: white;
@@ -293,15 +313,99 @@
   fill: #626262 !important;
 }
 
-.pulse {
-  display: block;
+.liveVideoReplayIconTray {
+  height: 20px;
+  margin-top: 35px;
+  z-index: 3
+}
+
+.liveVideoReplayIconUser {
+  height: 25px;
+  margin-top: 75px;
+  z-index: 3
+}
+
+@media screen and (max-width: 735px) {
+  .liveVideoReplayIconUser {
+    height: 15px;
+    margin-top: 35px;
+  }
+}
+
+.liveTrayItemIcon {
   width: 42px;
   height: 42px;
+}
+
+.liveUserItemIcon {
+  width: 96px;
+  height: 96px;
+}
+
+.liveTrayItemIcon, .liveUserItemIcon{
+  border-radius: 50%;
+  z-index: 2
+}
+
+@media screen and (max-width: 735px) {
+  .liveUserItemIcon {
+    width: 45px;
+    height: 45px;
+  }
+}
+
+.liveTrayItemBlackCircle {
+  width: 66px;
+  height: 66px;
+}
+
+.liveUserItemBlackCircle {
+  width: 140px;
+  height: 140px;
+}
+
+@media screen and (max-width: 735px) {
+  .liveUserItemBlackCircle {
+    width: 66px;
+    height: 66px;
+  }
+}
+
+.liveTrayItemBlackCircle, .liveUserItemBlackCircle {
+  background: black;
+  position: absolute;
+  border-radius: 50%;
+}
+
+.pulseTrayItem {
+  width: 42px;
+  height: 42px;
+}
+
+.pulseUserItem {
+  width: 125px;
+  height: 125px;
+}
+
+@media screen and (max-width: 735px) {
+  .pulseUserItem {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+.pulseTrayItem, .pulseUserItem {
+  display: block;
   border-radius: 50%;
   background: #000000;
   cursor: pointer;
   box-shadow: 0 0 0 rgba(255, 255, 255, 0.6);
   animation: pulse 2s infinite;
+}
+
+.toolbarRightSide___1Sdfc {
+  right: 0px;
+  position: absolute;
 }
 
 @-webkit-keyframes pulse {

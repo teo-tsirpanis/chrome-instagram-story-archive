@@ -25,7 +25,12 @@ export function getStoryObject(story) {
       }
     }
   } else {
-    var storyUser = (story.user) ? story.user : story.broadcast_owner;
+    var storyUser;
+    if(story.reel) {
+      storyUser = story.reel.user;
+    } else {
+      storyUser = (story.user) ? story.user : story.broadcast_owner;
+    }
     if(!storyUser) {
       storyUser = story.owner;
     }

@@ -10,7 +10,8 @@ import DashParser from "../node_modules/dashjs/src/dash/parser/DashParser.js";
 
 // returns the "slide" object the StoryGallery in the Story component uses
 export function getStorySlide(story, callback) {
-  const storyMedia = story['items'].map((media, key) => {
+  var items = (story.reel) ? story.reel.items : story.items;
+  const storyMedia = items.map((media, key) => {
     const url = getMediaItemUrl(media);
     if(isVideo(url)){
       return {
@@ -36,6 +37,19 @@ export function getStorySlide(story, callback) {
   };
 
   callback(storySlide);
+}
+
+// returns the correct "user" object from a story API response
+export function getUserFromStoryResponse(storyResponse) {
+  var user;
+  if(storyResponse.reel && storyResponse.reel !== null) {
+    user = storyResponse.reel.user;
+  } else if(storyResponse.post_live_item) {
+    user = storyResponse.post_live_item.user;
+  } else if(storyResponse.broadcast) {
+    user = storyResponse.broadcast.broadcast_owner;
+  }
+  return user;
 }
 
 // fetches the appropriate story and returns it (or downloads if shouldDownload is true)
@@ -67,7 +81,7 @@ export function fetchStory(selectedStory, shouldDownload, callback) {
     });
   } else {
     InstagramApi.getStory(selectedStory.id, (story) => {
-      if(story && story.items.length > 0) {
+      if(story && story.reel !== null && story.reel.items.length > 0) {
         if(shouldDownload) {
           downloadStory(story, () => callback(true));
         } else {
@@ -83,7 +97,8 @@ export function fetchStory(selectedStory, shouldDownload, callback) {
 // downloads a zip file containing the user's Story
 export function downloadStory(trayItem, callback) {
   var zip = new JSZip();
-  trayItem.items.map((storyItem, i) => {
+  var items = (trayItem.reel) ? trayItem.reel.items : trayItem.items;
+  items.map((storyItem, i) => {
     var mediaItemUrl = getMediaItemUrl(storyItem);
     // downloads each Story image/video and adds it to the zip file
     zip.file(getStoryFileName(storyItem, mediaItemUrl), urlToPromise(mediaItemUrl), {binary:true});
@@ -115,7 +130,11 @@ function urlToPromise(url) {
 // returns the name of the zip file to download with format: (username-timestamp.zip)
 function getZipFileName(trayItem) {
   var user, name;
-  user = (trayItem.user) ? trayItem.user : trayItem.owner;
+  if(trayItem.reel) {
+    user = trayItem.reel.user;
+  } else {
+    user = (trayItem.user) ? trayItem.user : trayItem.owner;
+  }
   name = (user.username) ? user.username : user.name;
   return name + "-" + moment().format() + ".zip";
 }
@@ -163,14 +182,24 @@ export function getLiveVideoManifestObject(manifest) {
 export function getLiveVideoMp4AudioUrl(manifest, callback) {
   var manifestObject = getLiveVideoManifestObject(manifest);
   var adaptationSet = manifestObject.Period_asArray[0].AdaptationSet_asArray;
-  callback(adaptationSet[0].Representation.BaseURL);
+  adaptationSet.forEach(function (adaptation) {
+    var representation = adaptation.Representation;
+    if(representation.mimeType === 'audio/mp4') {
+      callback(representation.BaseURL);
+    }
+  });  
 }
 
 // returns the URL of a video mp4 file for a post-live video
 export function getLiveVideoMp4VideoUrl(manifest, callback) {
   var manifestObject = getLiveVideoManifestObject(manifest);
   var adaptationSet = manifestObject.Period_asArray[0].AdaptationSet_asArray;
-  callback(adaptationSet[1].Representation.BaseURL);
+  adaptationSet.forEach(function (adaptation) {
+    var representation = adaptation.Representation;
+    if(representation.mimeType === 'video/mp4') {
+      callback(representation.BaseURL);
+    }
+  });
 }
 
 // returns an optimized URL format for the image/video

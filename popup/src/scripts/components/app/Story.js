@@ -25,7 +25,7 @@ class Story extends Component {
       storyLength: 0,
       progressBarsArray: [],
       currentlyPlaying: '',
-      currentStoryItem: this.props.item.story.items[0],
+      currentStoryItem: (this.props.item.story.reel) ? this.props.item.story.reel.items[0] : this.props.item.story.items[0],
       currentIndex: -1,
     };
     this._eventHandlers = {};
@@ -164,8 +164,9 @@ removeAllEvents(node, event) {
 }
 
 playStory(currentIndex) {
+  var storyItems = (this.props.item.story.reel) ? this.props.item.story.reel.items : this.props.item.story.items;
   this.setState({
-    currentStoryItem: this.props.item.story.items[this._imageGallery.getCurrentIndex()],
+    currentStoryItem: storyItems[this._imageGallery.getCurrentIndex()],
     currentIndex: currentIndex
   });
 

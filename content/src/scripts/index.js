@@ -5,13 +5,12 @@ import {Store} from 'react-chrome-redux';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import StoriesTray from './components/app/StoriesTray';
+import UserProfileStoryItem from './components/app/UserProfileStoryItem';
+import LocationStoryItem from './components/app/LocationStoryItem';
+import HashtagStoryItem from './components/app/HashtagStoryItem';
 import InstagramApi from '../../../utils/InstagramApi';
 import {getTimeElapsed, downloadStory, getLiveVideoManifestObject} from '../../../utils/Utils';
 import { MediaPlayer } from 'dashjs';
-import PhotoSwipe from 'photoswipe';
-import PhotoSwipeUI_Default from "../../../node_modules/photoswipe/dist/photoswipe-ui-default.min.js";
-import "../../../node_modules/photoswipe/dist/photoswipe.css";
-import "../../../node_modules/photoswipe/dist/default-skin/default-skin.css";
 import moment from 'moment';
 import $ from 'jquery';
 
@@ -36,7 +35,6 @@ injectTapEventPlugin();
 
 // ** MAIN ENTRY POINT ** //
 loadStories();
-injectPswpContainer();
 
 // tell background.js to load cookies so we can check if they are available before we make requests
 function loadStories() {
@@ -90,7 +88,9 @@ function getUserStory(instagramUserImage) {
       return user.username === username;
     });
     InstagramApi.getStory(user.pk, (story) => {
-      injectUserStory(instagramUserImage, story);
+      if(story.reel !== null || story.broadcast || story.post_live_item) {
+        injectUserStory(instagramUserImage, story);
+      }
     });
   });
 }
@@ -142,257 +142,45 @@ function injectExploreStories() {
 
 // inject the story for a particular user while on their profile page e.g. Instagram.com/username
 function injectUserStory(instagramUserImage, story) {
-  if(story.items.length > 0) {
-    $(instagramUserImageContainer).addClass('unseenStoryItem');
-    $(instagramUserImage).addClass('instagramUserImage');
-    $(instagramUserImage).addClass('center-div');
-    instagramUserImage.addEventListener("click", function() {
-      onStoryClicked(story);
-    });
-    instagramUserImage.addEventListener("contextmenu", function(ev) {
-      ev.preventDefault();
-      InstagramApi.getStory(story.id).then(function(story) {
-        downloadStory(story);
-      });
-    });
-  }
+  var container = document.getElementsByClassName("_b0acm")[0];
+  var storyItemComponent = (
+    <UserProfileStoryItem storyItem={story}/>
+  );
+  renderStoryItem(storyItemComponent, container);
 }
 
 // inject the story for a particular location while on its feed page e.g. Instagram.com/explore/locations/locationId
 function injectLocationStory(story) {
-  if(!document.getElementById("locationStoryIconContainer")) {
-    const locationStoryIconContainer = document.createElement('div');
-    const locationStoryIcon = document.createElement('img');
-    const locationIcon = document.createElement('img');
-    locationStoryIconContainer.id = "locationStoryIconContainer";
-    $(locationStoryIconContainer).addClass('locationStoryIconContainer');
-    $(locationStoryIconContainer).addClass('unseenStoryItem');
-    $(locationStoryIcon).addClass('locationStoryIcon');
-    $(locationStoryIcon).addClass('center-div');
-    $(locationStoryIcon).attr("src", story.owner.profile_pic_url);
-    $(locationIcon).addClass('locationIcon');
-    $(locationIcon).attr("src", chrome.extension.getURL('img/icon_location.png'));
-    $(locationStoryIconContainer).append(locationStoryIcon);
-    $(locationStoryIconContainer).append(locationIcon);
-    locationStoryIconContainer.addEventListener("click", function() {
-      onStoryClicked(story);
-    });
-    locationStoryIconContainer.addEventListener("contextmenu", function(ev) {
-      ev.preventDefault();
-      downloadStory(story);
-    });
-    instagramLocationFeed.insertBefore(locationStoryIconContainer, instagramLocationFeed.childNodes[0]);
-  }
+  const locationStoryIconContainer = document.createElement('div');
+  locationStoryIconContainer.id = "locationStoryIconContainer";
+  instagramLocationFeed.insertBefore(locationStoryIconContainer, instagramLocationFeed.childNodes[0]);
+  var container = document.getElementById("locationStoryIconContainer");
+  var storyItemComponent = (
+    <LocationStoryItem storyItem={story}/>
+  );
+  renderStoryItem(storyItemComponent, container);
 }
 
 // inject the story for a particular hashtag while on its feed page e.g. Instagram.com/explore/tags/hashtagName
 function injectHashtagStory(story) {
-  if(!document.getElementById("hashtagStoryIconContainer")) {
-    const hashtagStoryIconContainer = document.createElement('div');
-    const hashtagStoryIcon = document.createElement('img');
-    const hashtagIcon = document.createElement('img');
-    hashtagStoryIconContainer.id = "hashtagStoryIconContainer";
-    $(hashtagStoryIconContainer).addClass('hashtagStoryIconContainer');
-    $(hashtagStoryIconContainer).addClass('unseenStoryItem');
-    $(hashtagStoryIcon).addClass('hashtagStoryIcon');
-    $(hashtagStoryIcon).addClass('center-div');
-    $(hashtagStoryIcon).attr("src", story.owner.profile_pic_url);
-    $(hashtagIcon).addClass('hashtagIcon');
-    $(hashtagIcon).attr("src", chrome.extension.getURL('img/icon_hashtag.png'));
-    $(hashtagStoryIconContainer).append(hashtagStoryIcon);
-    $(hashtagStoryIconContainer).append(hashtagIcon);
-    hashtagStoryIconContainer.addEventListener("click", function() {
-      onStoryClicked(story);
-    });
-    hashtagStoryIconContainer.addEventListener("contextmenu", function(ev) {
-      ev.preventDefault();
-      downloadStory(story);
-    });
-    instagramHashtagFeed.insertBefore(hashtagStoryIconContainer, instagramHashtagFeed.childNodes[0]);
-  }
+  const hashtagStoryIconContainer = document.createElement('div');
+  hashtagStoryIconContainer.id = "hashtagStoryIconContainer";
+  instagramHashtagFeed.insertBefore(hashtagStoryIconContainer, instagramHashtagFeed.childNodes[0]);
+  var container = document.getElementById("hashtagStoryIconContainer");
+  var storyItemComponent = (
+    <HashtagStoryItem storyItem={story}/>
+  );
+  renderStoryItem(storyItemComponent, container);
 }
 
-// dispatch the selected story to the store
-function onStoryClicked(currentStoryItem) {
-  // proxyStore.dispatch({type: 'story-clicked-alias', currentStoryItem: currentStoryItem});
-  
-  if(currentStoryItem.broadcasts || currentStoryItem.broadcast_owner) {
-    if(currentStoryItem.broadcasts) {
-      showImageGallery(currentStoryItem.broadcasts);
-    } else {
-      showImageGallery(currentStoryItem);
-    }
-  } else if(currentStoryItem.items) {
-    // if there are new Story images available, show them in the gallery
-    showImageGallery(currentStoryItem.items);
-  } else {
-    // retrieve the user's Story and show them in the gallery
-    InstagramApi.getStory(currentStoryItem.id, (story) => {
-      showImageGallery(story.items);
-    });
-  }
-}
-
-// used to initialize and show the Story image gallery
-function getPswpElement(callback) {
-  // if photoswipe element exists, return it
-  if($('#pswp').length) {
-    callback(document.getElementById('pswp'));
-  } else {
-    // photoswipe element doesn't exist, inject it
-    $("#pswpContainer").load(chrome.extension.getURL("html/photoswipe.html"), function() {
-      callback(document.getElementById('pswp'));
-    });
-  }
-}
-
-// inject div container to host the Story image gallery
-function injectPswpContainer() {
-  var pswpContainer = document.createElement("div");
-  pswpContainer.setAttribute("id", "pswpContainer");
-  document.body.appendChild(pswpContainer);
-}
-
-// displays image gallery for Story images
-function showImageGallery(storyItems) {
-  
-  // retrieve the injected pswpElement
-  getPswpElement(function(pswpElement) {
-    var slides = [];
-    if(storyItems.dash_playback_url) {
-      var storyVideo = document.createElement('video');
-      storyVideo.id = "liveVideoPlayer";
-      $(storyVideo).css('width', '100%');
-      slides.push({
-        html: storyVideo,
-        storyItem: storyItems
-      });
-    } else {
-      storyItems.map((storyItem, i) => {
-        if(storyItem.dash_manifest) {
-          var storyVideo = document.createElement('video');
-          storyVideo.id = "liveVideoPlayer";
-          $(storyVideo).css('width', '100%');
-          slides.push({
-            html: storyVideo,
-            storyItem: storyItem
-          });
-        } else 
-        // if videos are available, create a new HTML slide containing the Story video
-        if(storyItem['video_versions']) {
-          var video = storyItem['video_versions'][0];
-          
-          var storyVideo = document.createElement('video');
-          var source = document.createElement("source");
-          storyVideo.setAttribute("controls", true);
-          if(i === 0) { storyVideo.setAttribute("autoplay", true); }
-          source.src = video['url'];
-          storyVideo.appendChild(source);
-          $(storyVideo).addClass('videoStoryItem');
-          $(storyVideo).addClass('pswp__video active');
-          $(storyVideo).css('position', 'absolute');
-          
-          slides.push({
-            html: storyVideo,
-            storyItem: storyItem
-          });
-        } else {
-          // create a normal slide with the Story image
-          var image = storyItem['image_versions2']['candidates'][0];
-          var url = image['url'].replace("http://", "https://");
-          slides.push({
-            src: url,
-            msrc: url,
-            w: image['width'],
-            h: image['height'],
-            storyItem: storyItem
-          });
-        }
-      });
-    }
-    
-    var options = {
-      closeOnScroll: false,
-      shareEl: false
-    };
-    
-    var gallery = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, slides, options);
-    
-    // update the Story author's username and profile picture
-    gallery.listen('afterChange', function() {
-      var currentItem = gallery.currItem.storyItem;
-      if(currentItem.broadcasts || currentItem.broadcast_owner) {
-        let player = MediaPlayer().create();
-        if(currentItem.dash_manifest) {
-          let url = gallery.currItem.storyItem.dash_manifest;
-          player.initialize(document.querySelector('#liveVideoPlayer'));
-          // a post-live video object contains a string representation of the manifest that needs to be parsed
-          var manifestObject = getLiveVideoManifestObject(url);
-          player.attachSource(manifestObject);
-        } else {
-          let url = gallery.currItem.storyItem.dash_playback_url;
-          player.initialize(document.querySelector('#liveVideoPlayer'), url, true);
-        }
-        player.getDebug().setLogToBrowserConsole(false);
-        player.play();
-      } else {
-        var currItem = $(gallery.currItem.container);
-        
-        var storyAuthorImage = currItem.find('.storyAuthorImage');
-        var storyAuthorUsername = currItem.find('.storyAuthorUsername');
-        
-        // only add the Story author's username/profile picture to the current slide if it doesn't already exist
-        if(storyAuthorImage.length == 0 && storyAuthorUsername.length == 0) {
-          storyAuthorImage = document.createElement('img');
-          storyAuthorImage.setAttribute("class", "storyAuthorImage");
-          storyAuthorImage.style.position = 'absolute';
-          
-          storyAuthorUsername = document.createElement('span');
-          storyAuthorUsername.setAttribute("class", "storyAuthorUsername");
-          storyAuthorUsername.style.position = 'absolute';
-          
-          $(currItem).append(storyAuthorImage);
-          $(currItem).append(storyAuthorUsername);
-        }
-        
-        $(storyAuthorImage).attr("src", currentItem['user']['profile_pic_url']);
-        $(storyAuthorUsername).text(currentItem['user']['username'] + " - " + getTimeElapsed(currentItem['taken_at']));
-        
-        if(currentItem['video_versions']) {
-          $(storyAuthorImage).css("top", "45px");
-          $(storyAuthorUsername).css("top", "55px");
-        }
-      }
-    });
-    
-    // handle playing/pausing videos while traversing the gallery
-    gallery.listen('beforeChange', function() {
-      var currItem = $(gallery.currItem.container);
-      // remove 'active' class from any videos
-      $('.pswp__video').removeClass('active');
-      // add 'active' class to the currently playing video
-      var currItemIframe = currItem.find('.pswp__video').addClass('active');
-      // for each video, pause any inactive videos, and play the active video
-      $('.pswp__video').each(function() {
-        if (!$(this).hasClass('active')) {
-          $(this)[0].pause();
-          $(this)[0].currentTime = 0;
-        } else {
-          $(this)[0].play();
-        }
-      });
-    });
-    
-    // handle pausing videos when the galley is closed
-    gallery.listen('close', function() {
-      $('.pswp__video').each(function() {
-        $(this)[0].pause();
-      });
-    });
-    
-    gallery.init();
-    
-  });
+function renderStoryItem(storyItemComponent, container) {
+  render(
+    <Provider store={proxyStore}>
+      <MuiThemeProvider muiTheme={muiTheme}>
+        {storyItemComponent}
+      </MuiThemeProvider>  
+    </Provider>, container
+  );
 }
 
 // render the proper story tray based on its type
@@ -415,7 +203,7 @@ function renderStoryTray(type) {
     render(
       <Provider store={proxyStore}>
         <MuiThemeProvider muiTheme={muiTheme}>
-          <StoriesTray onStoryClicked={(storyId) => onStoryClicked(storyId)} type={type}/>
+          <StoriesTray type={type}/>
         </MuiThemeProvider>  
       </Provider>
       , document.getElementById('rcr-anchor'));

@@ -17,15 +17,15 @@ class LiveVideo extends Component {
       chatMessagesList: [],
       liveVideoItem: this.props.item,
       updateInfoInterval: null,
-      isPostLive: (this.props.item.dash_manifest) ? true : false
+      isLiveVideoReplay: (this.props.item.dash_manifest) ? true : false
     }
   }
   
   componentDidMount() {
     this.playLiveVideo();
     // fetch initial set of comments
-    if(this.state.isPostLive) {
-      this.fetchPostLiveVideoComments(0);
+    if(this.state.isLiveVideoReplay) {
+      this.fetchLiveVideoReplayComments(0);
     } else {
       this.fetchLiveVideoComments(null);
       this.setState({updateInfoInterval: setInterval(function() {
@@ -61,9 +61,9 @@ class LiveVideo extends Component {
   
   // fetch the comments for a post-live video
   // TODO: right now it only fetches the first batch - need to fetch in an interval based on offset
-  fetchPostLiveVideoComments(timestamp) {
-    InstagramApi.getPostLiveVideoComments(this.state.liveVideoItem.id, timestamp, (postLiveVideoCommentsResponse) => {
-      postLiveVideoCommentsResponse.comments.slice(0).reverse().map((chatMessage, key) => {
+  fetchLiveVideoReplayComments(timestamp) {
+    InstagramApi.getLiveVideoReplayComments(this.state.liveVideoItem.id, timestamp, (liveVideoReplayCommentsResponse) => {
+      liveVideoReplayCommentsResponse.comments.slice(0).reverse().map((chatMessage, key) => {
         this.setState({chatMessagesList: [
           ...this.state.chatMessagesList, chatMessage
         ]});
@@ -74,10 +74,10 @@ class LiveVideo extends Component {
   
   playLiveVideo() {
     if(this.state.liveVideoPlayer == null) {
-      let url = this.state.liveVideoItem.dash_playback_url;
+      let url = this.state.liveVideoItem.dash_abr_playback_url;
       let player = MediaPlayer().create();
 
-      if(this.state.isPostLive) {
+      if(this.state.isLiveVideoReplay) {
         player.initialize(document.querySelector('#liveVideoPlayer-' + this.state.liveVideoItem.id));
         // a post-live video object contains a string representation of the manifest that needs to be parsed
         var manifestObject = getLiveVideoManifestObject(this.state.liveVideoItem.dash_manifest);
@@ -108,7 +108,7 @@ class LiveVideo extends Component {
   
   onChatMesssageAuthorUsernameClicked(index) {
     var chatMessage = this.state.chatMessagesList[index];
-    var chatMessageAuthorUsername = (this.state.isPostLive) ? chatMessage.comment.user.username : chatMessage.user.username;
+    var chatMessageAuthorUsername = (this.state.isLiveVideoReplay) ? chatMessage.comment.user.username : chatMessage.user.username;
     window.open('https://www.instagram.com/' + chatMessageAuthorUsername + '/');
     AnalyticsUtil.track("Live Video Comment Author Username Clicked", {username: chatMessageAuthorUsername});
   }
@@ -222,7 +222,7 @@ class LiveVideo extends Component {
           <img src={this.state.liveVideoItem.broadcast_owner.profile_pic_url} style={styles.storyAuthorImage} onClick={() => this.onStoryAuthorUsernameClicked()} />
           <p style={styles.storyAuthorUsername} onClick={() => this.onStoryAuthorUsernameClicked()}>{this.state.liveVideoItem.broadcast_owner.username}</p>
           
-          {!this.state.isPostLive &&
+          {!this.state.isLiveVideoReplay &&
             <div>
               <div style={styles.liveCountLabel}>
                 <VisibilityIcon color="#ffffff" style={{float: 'left'}} viewBox={'0 0 32 32'}/>
