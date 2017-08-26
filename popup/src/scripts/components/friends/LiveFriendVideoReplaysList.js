@@ -20,6 +20,7 @@ class LiveFriendVideoReplaysList extends Component {
     super(props);
     this.state = {
       selectedIndex: -1,
+      downloadingIndex: -1,
       isDownloadLiveVideoDialogOpen: false
     }
   }
@@ -37,7 +38,10 @@ class LiveFriendVideoReplaysList extends Component {
     return (
       <IconButton
         tooltip="Download"
-        onClick={() => this.setState({isDownloadLiveVideoDialogOpen: true})}>
+        onClick={() => this.setState({
+          isDownloadLiveVideoDialogOpen: true,
+          downloadingIndex: index
+        })}>
         <DownloadIcon />
       </IconButton>
     );
@@ -66,11 +70,13 @@ class LiveFriendVideoReplaysList extends Component {
           <Subheader>Live Video Replays</Subheader>
           {liveFriendVideoReplaysListData}
         </SelectableList>
-        <LiveVideoReplayDownloadDialog
-          isOpen={this.state.isDownloadLiveVideoDialogOpen}
-          liveVideoReplays={this.props.friendStories.post_live.post_live_items[0].broadcasts}
-          onRequestClose={() => this.setState({isDownloadLiveVideoDialogOpen: false})}
-          />
+        {this.state.isDownloadLiveVideoDialogOpen &&
+          <LiveVideoReplayDownloadDialog
+            isOpen={this.state.isDownloadLiveVideoDialogOpen}
+            liveVideoReplays={this.props.friendStories.post_live.post_live_items[this.state.downloadingIndex].broadcasts}
+            onRequestClose={() => this.setState({isDownloadLiveVideoDialogOpen: false})}
+            />
+        }
       </div>    
     )
   }
