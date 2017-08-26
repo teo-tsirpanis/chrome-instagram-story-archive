@@ -12,9 +12,16 @@ class StoryGalleryVideo extends Component {
   }
   
   render() {
+    const styles = {
+      video: {
+        maxHeight: '100vh',
+        margin: 'auto'
+      }
+    }
+    
     return (
       <div>
-        <video loop id={this.props.id} controls src={this.props.src} />
+        <video style={styles.video} loop id={this.props.id} controls src={this.props.src} />
       </div>
     )
   }
