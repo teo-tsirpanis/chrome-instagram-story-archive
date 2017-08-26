@@ -123,6 +123,12 @@ function injectFriendStories() {
         friendStories: friendStoriesResponse
       });
     });
+    InstagramApi.getExploreFeed((exploreStoriesResponse) => {
+      proxyStore.dispatch({
+        type: 'SET_EXPLORE_STORIES',
+        exploreStories: InstagramApi.getExploreStories(exploreStoriesResponse)
+      });
+    });
   }
 }
 
