@@ -1,6 +1,8 @@
 # Chrome IG Story
 Chrome extension that lets you view your friend's Instagram Stories in the browser.
 
+<a href="https://chrome.google.com/webstore/detail/chrome-ig-story/bojgejgifofondahckoaahkilneffhmf"><img src="https://developer.chrome.com/webstore/images/ChromeWebStore_BadgeWBorder_v2_206x58.png"/></a>
+
 <img src="https://cloud.githubusercontent.com/assets/2003684/23597569/db7c76cc-01e8-11e7-843a-8886852c4b87.png"/>
 
 <img src="https://cloud.githubusercontent.com/assets/2003684/23597595/1ec709e2-01e9-11e7-8bb8-8bb7ff77ef58.png"/>
