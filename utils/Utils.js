@@ -211,7 +211,7 @@ export function getMediaItemUrl(storyItem) {
     mediaItem = storyItem['image_versions2']['candidates'][0];
   }
   var secureUrl = mediaItem['url'].replace("http://", "https://");
-  return secureUrl.split("?")[0]; // leave out ig_cache_key
+  return secureUrl;
 }
 
 // extracts and returns the id for the live video because the id on the object itself is sometimes wrong
