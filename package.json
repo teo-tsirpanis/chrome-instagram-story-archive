@@ -9,7 +9,7 @@
   "author": "Alec Garcia",
   "dependencies": {
     "codem-isoboxer": "^0.3.4",
-    "dashjs": "^2.5.0",
+    "dashjs": "^2.6.0",
     "dgram": "^1.0.1",
     "dns": "^0.2.2",
     "file-saver": "^1.3.3",

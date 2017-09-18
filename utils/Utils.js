@@ -6,6 +6,7 @@ import moment from 'moment';
 import AnalyticsUtil from './AnalyticsUtil';
 import InstagramApi from './InstagramApi';
 import XLinkController from "../node_modules/dashjs/src/streaming/controllers/XlinkController.js";
+import ErrorHandler from "../node_modules/dashjs/src/streaming/utils/ErrorHandler.js";
 import DashParser from "../node_modules/dashjs/src/dash/parser/DashParser.js";
 
 // returns the "slide" object the StoryGallery in the Story component uses
@@ -170,7 +171,7 @@ function renderStoryImage(item) {
 
 // returns a parsed manifest object from a dash manifest string representation
 export function getLiveVideoManifestObject(manifest) {
-  const parser = DashParser().create();
+  const parser = DashParser().create({errorHandler: ErrorHandler().getInstance()});
   const xlink = XLinkController().create({});
   var mpd = parser.parse(manifest, xlink);
   mpd.loadedTime = new Date();
