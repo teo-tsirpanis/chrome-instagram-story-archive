@@ -74,7 +74,7 @@ class LiveVideo extends Component {
   
   playLiveVideo() {
     if(this.state.liveVideoPlayer == null) {
-      let url = this.state.liveVideoItem.dash_abr_playback_url;
+      let url = this.state.liveVideoItem.dash_playback_url;
       let player = MediaPlayer().create();
 
       if(this.state.isLiveVideoReplay) {

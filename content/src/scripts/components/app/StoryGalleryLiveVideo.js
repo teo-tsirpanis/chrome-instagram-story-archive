@@ -18,7 +18,7 @@ class StoryGalleryLiveVideo extends Component {
       var manifestObject = getLiveVideoManifestObject(this.props.liveItem.dash_manifest);
       player.attachSource(manifestObject);
     } else {
-      player.initialize(document.querySelector('#liveVideoPlayer-' + this.props.liveItem.id), this.props.liveItem.dash_abr_playback_url, true);
+      player.initialize(document.querySelector('#liveVideoPlayer-' + this.props.liveItem.id), this.props.liveItem.dash_playback_url, true);
     }
     
     player.getDebug().setLogToBrowserConsole(false);
