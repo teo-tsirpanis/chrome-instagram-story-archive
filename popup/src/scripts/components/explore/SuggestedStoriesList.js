@@ -85,7 +85,7 @@ class SuggestedStoriesList extends Component {
               <IconButton
                 tooltip="Download"
                 onClick={() => this.onDownloadStory(key)}>
-                {(this.state.isDownloadingStory && this.state.downloadingIndex === index) ? <CircularProgress size={24}/> : <DownloadIcon />}
+                {(this.state.isDownloadingStory && this.state.downloadingIndex === key) ? <CircularProgress size={24}/> : <DownloadIcon />}
               </IconButton>
             </ToolbarGroup>
           </Toolbar>
