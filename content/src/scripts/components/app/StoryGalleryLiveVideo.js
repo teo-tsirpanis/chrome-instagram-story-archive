@@ -17,12 +17,12 @@ class StoryGalleryLiveVideo extends Component {
       // a post-live video object contains a string representation of the manifest that needs to be parsed
       var manifestObject = getLiveVideoManifestObject(this.props.liveItem.dash_manifest);
       player.attachSource(manifestObject);
+      player.play();
     } else {
       player.initialize(document.querySelector('#liveVideoPlayer-' + this.props.liveItem.id), this.props.liveItem.dash_playback_url, true);
     }
     
     player.getDebug().setLogToBrowserConsole(false);
-    player.play();
   }
   
   render() {

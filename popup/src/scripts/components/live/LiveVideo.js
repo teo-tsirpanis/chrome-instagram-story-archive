@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { MediaPlayer } from 'dashjs';
+import MediaPlayerEvents from "../../../../../node_modules/dashjs/src/streaming/MediaPlayerEvents.js";
 import {List, ListItem} from 'material-ui/List';
 import Avatar from 'material-ui/Avatar';
 import $ from 'jquery';
@@ -76,18 +77,25 @@ class LiveVideo extends Component {
     if(this.state.liveVideoPlayer == null) {
       let url = this.state.liveVideoItem.dash_playback_url;
       let player = MediaPlayer().create();
-
+      
+      player.on(MediaPlayerEvents.ERROR, function(error) {
+        if(error.event && error.event.includes('MEDIA_ERR_DECODE')) {
+          this.setState({liveVideoPlayer: null});
+          this.playLiveVideo();
+        }
+      }.bind(this));
+      
       if(this.state.isLiveVideoReplay) {
         player.initialize(document.querySelector('#liveVideoPlayer-' + this.state.liveVideoItem.id));
         // a post-live video object contains a string representation of the manifest that needs to be parsed
         var manifestObject = getLiveVideoManifestObject(this.state.liveVideoItem.dash_manifest);
         player.attachSource(manifestObject);
+        player.play();
       } else {
         player.initialize(document.querySelector('#liveVideoPlayer-' + this.state.liveVideoItem.id), url, true);
       }
       
       player.getDebug().setLogToBrowserConsole(false);
-      player.play();
       this.setState({liveVideoPlayer: player});
     } else {
       this.state.liveVideoPlayer.play();
