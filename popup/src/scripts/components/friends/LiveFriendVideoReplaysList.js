@@ -47,7 +47,7 @@ class LiveFriendVideoReplaysList extends Component {
   onShareStory(index) {
     var selectedStory = this.props.friendStories.post_live.post_live_items[index].broadcasts[0];
     AnalyticsUtil.track("Share Story", AnalyticsUtil.getStoryObject(selectedStory));
-    window.open('https://watchmatcha.com/user/' + selectedStory.user.username);
+    window.open('https://watchmatcha.com/user/' + selectedStory.broadcast_owner.username);
   }
   
   render() {
