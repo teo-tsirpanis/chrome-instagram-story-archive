@@ -257,6 +257,12 @@
   transform: translate(0%, -50%);
 }
 
+.center-horizontal {
+  position: relative;
+  left: 50%;
+  transform: translate(-50%, 0%);
+}
+
 .liveStoryInfoSpan {
   position: absolute;
   color: white;

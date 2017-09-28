@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
+import {Toolbar, ToolbarGroup} from 'material-ui/Toolbar';
 import {List, ListItem, makeSelectable} from 'material-ui/List';
 import Avatar from 'material-ui/Avatar';
 import IconButton from 'material-ui/IconButton';
 import Subheader from 'material-ui/Subheader';
 import DownloadIcon from 'material-ui/svg-icons/file/file-download';
+import ShareIcon from 'material-ui/svg-icons/social/share';
 import CircularProgress from 'material-ui/CircularProgress';
-import {fetchStory} from '../../../../../utils/Utils';
+import {fetchStory, getTimeElapsed} from '../../../../../utils/Utils';
 import AnalyticsUtil from '../../../../../utils/AnalyticsUtil';
 
 let SelectableList = makeSelectable(List);
@@ -31,25 +33,27 @@ class SuggestedStoriesList extends Component {
     AnalyticsUtil.track("Story List Item Clicked", AnalyticsUtil.getStoryObject(selectedStory));
   }
   
-  getMenuItem(index) {
-    return (
-      <IconButton
-        tooltip="Download"
-        onClick={() => {
-          if(!this.state.isDownloadingStory) {
-            var selectedStory = this.props.stories.tray[index];
-            this.setState({
-              isDownloadingStory: true,
-              downloadingIndex: index
-            });
-            fetchStory(selectedStory, true, () => {
-              this.setState({isDownloadingStory: false});
-            });
-          }
-        }}>
-        {(this.state.isDownloadingStory && this.state.downloadingIndex === index) ? <CircularProgress size={24}/> : <DownloadIcon />}
-      </IconButton>
-    );
+  onDownloadStory(index) {
+    if(!this.state.isDownloadingStory) {
+      var selectedStory = this.props.stories.tray[index];
+      this.setState({
+        isDownloadingStory: true,
+        downloadingIndex: index
+      });
+      fetchStory(selectedStory, true, () => {
+        this.setState({isDownloadingStory: false});
+      });
+    }
+  }
+  
+  onShareStory(index) {
+    var selectedStory = this.props.stories.tray[index];
+    AnalyticsUtil.track("Share Story", AnalyticsUtil.getStoryObject(selectedStory));
+    if(selectedStory.owner) {
+      window.open('https://watchmatcha.com/location/' + selectedStory.location.pk);
+    } else {
+      window.open('https://watchmatcha.com/user/' + selectedStory.user.username);
+    }
   }
   
   render() {
@@ -61,10 +65,31 @@ class SuggestedStoriesList extends Component {
         <ListItem
           key={key}
           value={key}
-          primaryText={name}
-          leftAvatar={<Avatar src={user.profile_pic_url} />}
-          rightIconButton={this.getMenuItem(key)}
-          />
+          innerDivStyle={{paddingTop: '0px', paddingBottom: '0px'}}>
+          <Toolbar style={{paddingTop: '0px', paddingBottom: '0px', background: 'transparent'}}>
+            <ToolbarGroup firstChild={true}>
+              <ListItem
+                disabled
+                primaryText={name}
+                secondaryText={getTimeElapsed(friendStory.latest_reel_media)}
+                leftAvatar={<Avatar src={user.profile_pic_url} />}
+                innerDivStyle={{marginLeft: '-14px'}}
+                />
+            </ToolbarGroup>
+            <ToolbarGroup lastChild={true}>
+              <IconButton
+                tooltip={"Share"}
+                onClick={() => this.onShareStory(key)}>
+                <ShareIcon />
+              </IconButton>
+              <IconButton
+                tooltip="Download"
+                onClick={() => this.onDownloadStory(key)}>
+                {(this.state.isDownloadingStory && this.state.downloadingIndex === index) ? <CircularProgress size={24}/> : <DownloadIcon />}
+              </IconButton>
+            </ToolbarGroup>
+          </Toolbar>
+        </ListItem>
       )
     });
     

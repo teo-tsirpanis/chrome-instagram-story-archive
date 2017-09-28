@@ -5,6 +5,8 @@ import TextField from 'material-ui/TextField';
 import ActionSearchIcon from 'material-ui/svg-icons/action/search';
 import NavigationArrowBackIcon from 'material-ui/svg-icons/navigation/arrow-back';
 import NavigationCloseIcon from 'material-ui/svg-icons/navigation/close';
+import MapIcon from 'material-ui/svg-icons/maps/map';
+import RaisedButton from 'material-ui/RaisedButton';
 import FlatButton from 'material-ui/FlatButton';
 import IconButton from 'material-ui/IconButton';
 import Divider from 'material-ui/Divider';
@@ -118,6 +120,11 @@ class SearchPage extends Component {
       });
     }
   }
+  
+  onViewStoryMap() {
+    AnalyticsUtil.track("View Story Map Button Clicked");
+    window.open('https://watchmatcha.com/');
+  }
 
   render() {
     const styles = {
@@ -125,14 +132,6 @@ class SearchPage extends Component {
         margin: '10px',
         textAlign: 'center',
         display: 'inline-block'
-      },
-      searchAlternativeText: {
-        margin: '0px',
-        textAlign: 'center',
-        fontSize: '14px',
-        color: 'rgba(0, 0, 0, 0.54)',
-        paddingTop: '10px',
-        paddingBottom: '10px'
       },
       searchContainer: {
         position: 'absolute',
@@ -241,7 +240,7 @@ class SearchPage extends Component {
                 style={styles.splashSearchField}
                 onKeyPress={(e) => this.handleSplashSearchKeyPress(e)}
                 />
-
+              
               <FlatButton
                 label="Search"
                 secondary={true}
@@ -249,8 +248,14 @@ class SearchPage extends Component {
                 onClick={(e) => this.handleSplashSearch(e)}
                 />
             </Paper>
-
-            <p style={styles.searchAlternativeText}>or select a story from the list on the left side</p>
+            
+            <RaisedButton
+              label="View Story Map"
+              className="center-horizontal"
+              style={{marginTop: '20px'}}
+              icon={<MapIcon />}
+              onClick={() => this.onViewStoryMap()}
+              />
           </div>
         }
       </div>
