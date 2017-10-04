@@ -1,12 +1,12 @@
 .unseenStoryItem {
-  background: -webkit-linear-gradient(left top, #a31391 0%, #f8a74f 100%);
+  background: -webkit-linear-gradient(45deg, #fda744, #bf0889);
   margin-bottom: 3px;
 }
 
 .seenStoryItem {
   border-style: solid;
-  border-width: 3px;
-  border-color: gray;
+  border-width: 2px;
+  border-color: #c7c7c7;
 }
 
 .mutedStoryItem {
@@ -22,13 +22,14 @@
 }
 
 ._qdmzb .instagramUserImage {
-  width: 92%;
-  height: 92%;
-  border-radius: 50%;
+  width: 90%;
+  height: 90%;
   cursor: pointer;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px #fff;
 }
 
 .storyAuthorImage {
