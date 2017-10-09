@@ -95,6 +95,17 @@ export function fetchStory(selectedStory, shouldDownload, callback) {
   }
 }
 
+// given a username, fetches and downloads the user's story after retrieving the user's ID
+export function downloadStoryByUsername(username, callback) {
+  InstagramApi.getUserByUsername(username).then(function(user) {
+    fetchStory({id: user.user.id}, true, () => {
+      if(callback) {
+        callback();
+      }
+    });
+  });
+}
+
 // downloads a zip file containing the user's Story
 export function downloadStory(trayItem, callback) {
   var zip = new JSZip();

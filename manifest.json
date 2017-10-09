@@ -17,7 +17,8 @@
     "cookies",
     "webRequest",
     "webRequestBlocking",
-    "*://*.instagram.com/*"
+    "*://*.instagram.com/*",
+    "storage"
   ],
   "content_scripts": [
     {

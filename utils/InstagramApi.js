@@ -173,6 +173,19 @@ function getLiveVideoInfo(id, callback) {
   .then(callback);
 }
 
+// fetch a particular user's information
+function getUserByUsername(username) {
+  return new Promise(function(resolve, reject) {
+    fetch(`https://www.instagram.com/${username}/?__a=1`)
+    .then(res => res.json())
+    .then(user => resolve(user))
+    .catch(function(e) {
+      console.log(e);
+      reject(e);
+    });
+  });
+}
+
 function checkStatus(response) {
   if (response.status >= 200 && response.status < 300) {
     return response;
@@ -209,6 +222,7 @@ const InstagramApi = {
   getLiveVideoComments,
   getLiveVideoReplayComments,
   getUserInfo,
+  getUserByUsername,
   searchForUser,
   searchForHashtag,
   searchForLocation

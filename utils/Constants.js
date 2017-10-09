@@ -18,6 +18,9 @@ export const INSTAGRAM_HASHTAG_NAME_CLASS_NAME = "_kwqc3";
 export const INSTAGRAM_USER_IMAGE_CLASS_NAME_CONTAINER = "_l8yre _qdmzb";
 export const INSTAGRAM_USER_IMAGE_CLASS_NAME = "_9bt3u";
 export const INSTAGRAM_USER_USERNAME_CLASS_NAME = "_rf3jb notranslate";
+export const INSTAGRAM_NATIVE_STORIES_CONTAINER_CLASS_NAME = "_11dqz";
+export const INSTAGRAM_NATIVE_STORIES_LIST_CONTAINER_CLASS_NAME = "_havey";
+export const INSTAGRAM_STORIES_USER_HEADER_CONTAINER = "_ikq0n";
 
 // UI colors
 export const TAB_TEXT_COLOR_GREEN = "#5DBA99";

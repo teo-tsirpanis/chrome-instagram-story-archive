@@ -5,11 +5,13 @@ import {Store} from 'react-chrome-redux';
 import injectTapEventPlugin from 'react-tap-event-plugin';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import StoriesTray from './components/app/StoriesTray';
+import StoryDownloadButton from './components/app/StoryDownloadButton';
+import AnonymousStoryViewsButton from './components/app/AnonymousStoryViewsButton';
 import UserProfileStoryItem from './components/app/UserProfileStoryItem';
 import LocationStoryItem from './components/app/LocationStoryItem';
 import HashtagStoryItem from './components/app/HashtagStoryItem';
 import InstagramApi from '../../../utils/InstagramApi';
-import {getTimeElapsed, downloadStory, getLiveVideoManifestObject} from '../../../utils/Utils';
+import {getTimeElapsed, getLiveVideoManifestObject} from '../../../utils/Utils';
 import { MediaPlayer } from 'dashjs';
 import moment from 'moment';
 import $ from 'jquery';
@@ -23,10 +25,16 @@ import {
   INSTAGRAM_USER_IMAGE_CLASS_NAME_CONTAINER,
   INSTAGRAM_USER_IMAGE_CLASS_NAME,
   INSTAGRAM_USER_USERNAME_CLASS_NAME,
+  INSTAGRAM_NATIVE_STORIES_CONTAINER_CLASS_NAME,
+  INSTAGRAM_NATIVE_STORIES_LIST_CONTAINER_CLASS_NAME,
+  INSTAGRAM_STORIES_USER_HEADER_CONTAINER,
   muiTheme
 } from '../../../utils/Constants';
 
-var instagramFeed, instagramExploreFeed, instagramLocationFeed, instagramHashtagFeed, instagramHashtagName, instagramUserImage, instagramUserImageContainer, instagramUserUsername;
+var instagramFeed, instagramExploreFeed, instagramLocationFeed,
+instagramHashtagFeed, instagramHashtagName, instagramUserImage,
+instagramUserImageContainer, instagramUserUsername,
+instagramNativeStoriesContainer, instagramStoriesUserHeaderContainer;
 const proxyStore = new Store({portName: 'chrome-ig-story'});
 
 // Needed for onTouchTap
@@ -57,8 +65,11 @@ function injectContentScript() {
   instagramUserImageContainer = document.getElementsByClassName(INSTAGRAM_USER_IMAGE_CLASS_NAME_CONTAINER)[0];
   instagramUserImage = document.getElementsByClassName(INSTAGRAM_USER_IMAGE_CLASS_NAME)[0];
   instagramUserUsername = document.getElementsByClassName(INSTAGRAM_USER_USERNAME_CLASS_NAME)[0];
+  instagramNativeStoriesContainer = document.getElementsByClassName(INSTAGRAM_NATIVE_STORIES_CONTAINER_CLASS_NAME)[0];
+  instagramStoriesUserHeaderContainer = document.getElementsByClassName(INSTAGRAM_STORIES_USER_HEADER_CONTAINER)[0];
   
-  if(instagramFeed) {
+  if(instagramFeed && !instagramNativeStoriesContainer) {
+    // only inject the story tray if the official "native" stories aren't present on the page
     injectFriendStories();
   } else if (instagramExploreFeed) {
     injectExploreStories();
@@ -78,7 +89,69 @@ function injectContentScript() {
     hashtag = hashtag.replace('#', '');
     getHashtagStory(hashtag);
   }
-}
+  
+  // inject functionality into the official "native" stories container
+  if(instagramStoriesUserHeaderContainer) {
+    const anonymousStoryViewsButtonContainer = document.createElement('div');
+    anonymousStoryViewsButtonContainer.id = "anonymousStoryViewsButtonContainer";
+    anonymousStoryViewsButtonContainer.style.position = 'absolute';
+    anonymousStoryViewsButtonContainer.style.right = '0px';
+    instagramStoriesUserHeaderContainer.appendChild(anonymousStoryViewsButtonContainer);
+    
+    render(
+      <MuiThemeProvider muiTheme={muiTheme}>
+        <AnonymousStoryViewsButton/>
+      </MuiThemeProvider>  
+      , document.getElementById('anonymousStoryViewsButtonContainer'));
+      
+      var nativeStoriesListContainer = document.getElementsByClassName(INSTAGRAM_NATIVE_STORIES_LIST_CONTAINER_CLASS_NAME)[1];
+      
+      // observe changes to the stories list container, and inject a download button to each story item row
+      var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          
+          if(mutation.type == "childList" && mutation.addedNodes.length > 0) {
+            var addedNode = mutation.addedNodes[0];
+            var userNameNode;
+            
+            if(addedNode.tagName === 'DIV') {
+              var addedNodeContainer = addedNode.childNodes[0];
+              var usernameNodeContainer = addedNodeContainer.childNodes[1];
+              if(usernameNodeContainer) {
+                userNameNode = usernameNodeContainer.childNodes[0];
+              } 
+            } else if(addedNode.tagName === 'A') {
+              userNameNode = addedNode.getElementsByClassName('_gh2cz')[0];
+            }
+            
+            if(userNameNode === undefined) {
+              return;
+            }
+            
+            var username = userNameNode.innerText;
+            var storyDownloadButtonContainer = document.createElement('div');
+            
+            storyDownloadButtonContainer.style.position = 'absolute';
+            storyDownloadButtonContainer.style.right = '10px';
+            storyDownloadButtonContainer.style.bottom = '15px';
+            storyDownloadButtonContainer.id = username;
+            
+            addedNode.appendChild(storyDownloadButtonContainer);
+            
+            render(
+              <MuiThemeProvider muiTheme={muiTheme}>
+                <StoryDownloadButton username={username}/>
+              </MuiThemeProvider>
+              , document.getElementById(username));
+            }
+          });    
+        });
+        
+        var config = {childList: true, subtree: true };
+        
+        observer.observe(nativeStoriesListContainer, config);  
+      }
+    }
 
 // fetch user's Story and inject it into their profile page if it's available
 function getUserStory(instagramUserImage) {

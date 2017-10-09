@@ -7,6 +7,7 @@ import ReduxThunk from 'redux-thunk';
 var instagramCookies = {};
 var DOMAIN_URL = "https://www.instagram.com";
 var ajaxReinject = false;
+var setting_ViewStoriesAnonymously = true;
 const X_IG_CAPABILITIES = "36oD";
 const USER_AGENT_STRING = "Instagram 10.26.0 (iPhone7,2; iOS 10_1_1; en_US; en-US; scale=2.00; gamut=normal; 750x1334) AppleWebKit/420+";
 
@@ -55,6 +56,8 @@ wrapStore(store, {
 
 loadCookies();
 
+applySettings();
+
 function launchPopup() {
   chrome.tabs.create({
     url: chrome.extension.getURL('html/popup.html'),
@@ -102,6 +105,12 @@ function sendCookies(instagramCookies) {
   });
 }
 
+function applySettings() {
+  chrome.storage.local.get("viewStoriesAnonymously", function(items) {
+    setting_ViewStoriesAnonymously = (items.viewStoriesAnonymously) ? true : false;
+  });
+}
+
 // listen for the content script to send us a message so we can send back cookies
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
@@ -125,6 +134,28 @@ chrome.runtime.onMessage.addListener(
       }
     }
   });
+  
+  // listen for storage changes to update the state for user settings
+  chrome.storage.onChanged.addListener(function(changes, namespace) {
+    for (var key in changes) {
+      var storageChange = changes[key];
+      if(key === 'viewStoriesAnonymously') {
+        setting_ViewStoriesAnonymously = storageChange.newValue;
+      }
+    }
+  });
+  
+  // listen for web requests so we can cancel them if necessary
+  chrome.webRequest.onBeforeRequest.addListener(
+    function() {
+      // cancel the request to mark a story as seen if the setting to view stories anonymously is set to true
+      return {cancel: (setting_ViewStoriesAnonymously) ? true : false};
+    },
+    {
+      urls: ["*://*.instagram.com/stories/reel/seen"]
+    },
+    ["blocking"]
+  );
   
   // hook into web request and modify headers before sending the request
   chrome.webRequest.onBeforeSendHeaders.addListener(
