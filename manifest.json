@@ -1,7 +1,7 @@
 {
   "name": "Chrome IG Story",
   "description": "View and download Instagram Stories from your browser.",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "manifest_version": 2,
   "background": {
     "scripts": [
