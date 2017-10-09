@@ -75,7 +75,7 @@ class StoryTrayItem extends Component {
     name = (user.username) ? user.username : user.name;
     
     return (
-      <div ref="TrayItemContainer" style={styles.trayItemContainer} className={(this.props.storyItem.muted) ? "mutedStoryItem" : ""}>
+      <div ref="TrayItemContainer" id={"igs_" + name} style={styles.trayItemContainer} className={(this.props.storyItem.muted) ? "mutedStoryItem" : ""}>
         {this.state.isDownloadingStory && <CircularProgress className="center-div" style={styles.storyDownloadProgressIndicator} size={90} />}
         <img className={"trayItemImage " + seenClass} src={user.profile_pic_url} onClick={() => this.props.onViewUserStory(this.props.storyItem)}/>
         <span style={styles.trayItemUsername}>{name.substr(0, 10) + (name.length > 10 ? '…' : '')}</span>
