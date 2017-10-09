@@ -209,7 +209,7 @@ onCloseFullscreenStoryButtonClicked() {
 }
 
 onStoryAuthorUsernameClicked() {
-  var authorUsername = this.props.item.story.user.username;
+  var authorUsername = this.state.currentStoryItem.user.username;
   window.open('https://www.instagram.com/' + authorUsername + '/');
   AnalyticsUtil.track("Story Author Username Clicked", {username: authorUsername});
 }
