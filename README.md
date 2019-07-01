@@ -1,3 +1,5 @@
+__NOTE:__ This repository is a mirror of [CaliAlec/ChromeIGStory](https://github.com/CaliAlec/ChromeIGStory), a repository which was deleted for unknown reasons. If its author is no more interested, a willing maintainer can open an issue and continue this project.
+
 # Chrome IG Story
 Chrome extension that lets you view your friend's Instagram Stories in the browser.
 
